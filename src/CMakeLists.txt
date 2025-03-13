@@ -94,6 +94,10 @@ else()
   add_subdirectory(transaction)
   add_subdirectory(verification)
 
+  # set onnxruntime lib
+  find_library(ONNXRUNTIME_LIB onnxruntime PATHS ${CMAKE_SOURCE_DIR}/third_party/onnxruntime/lib)
+  find_library(ONNXRUNTIME_PROVIDERS_SHARED_LIB onnxruntime_providers_shared PATHS ${CMAKE_SOURCE_DIR}/third_party/onnxruntime/lib)
+
   set(DUCKDB_LINK_LIBS
       ${DUCKDB_SYSTEM_LIBS}
       duckdb_fsst
@@ -107,7 +111,15 @@ else()
       duckdb_skiplistlib
       duckdb_mbedtls
       duckdb_yyjson
-      duckdb_zstd)
+      duckdb_zstd
+      # add onnx, onnxoptimizer ,onnxruntime lib
+      onnx_optimizer
+      optimize_c_api
+      onnx
+      onnx_proto
+      ${ONNXRUNTIME_LIB}
+      ${ONNXRUNTIME_PROVIDERS_SHARED_LIB}
+      )
 
   add_library(duckdb SHARED ${ALL_OBJECT_FILES})
 

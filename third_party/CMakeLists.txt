@@ -14,6 +14,8 @@ if(NOT AMALGAMATION_BUILD)
   add_subdirectory(fsst)
   add_subdirectory(yyjson)
   add_subdirectory(zstd)
+  # add onnx optimizer
+  add_subdirectory(onnx_optimizer)
 endif()
 
 if(NOT WIN32

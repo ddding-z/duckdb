@@ -1,0 +1,3 @@
+[submodule "third_party/onnx_optimizer"]
+	path = third_party/onnx_optimizer
+	url = https://github.com/ddding-z/onnx_optimizer_C.git

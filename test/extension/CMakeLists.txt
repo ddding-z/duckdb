@@ -9,6 +9,16 @@ build_loadable_extension_directory(
   ${PARAMETERS}
   loadable_extension_demo.cpp)
 
+# retree_inference_function
+build_loadable_extension_directory(
+  retree_inference_function_extension
+  "CPP"
+  test/extension
+  "default-version"
+  ""
+  ${PARAMETERS}
+  retree_inference_function_extension.cpp)
+
 if(NOT WIN32 AND NOT SUN)
   add_definitions(-DDUCKDB_BUILD_DIRECTORY="${PROJECT_BINARY_DIR}")
 
@@ -20,6 +30,34 @@ if(NOT WIN32 AND NOT SUN)
     ""
     ${PARAMETERS}
     ../extension/loadable_extension_optimizer_demo.cpp)
+
+  # retree_optimization_function
+  build_loadable_extension_directory(
+    retree_convert_rule_extension
+    "CPP"
+    test/extension
+    "default-version"
+    ""
+    ${PARAMETERS}
+    ../extension/retree_convert_rule_extension.cpp)
+  
+  build_loadable_extension_directory(
+    retree_prune_rule_extension
+    "CPP"
+    test/extension
+    "default-version"
+    ""
+    ${PARAMETERS}
+    ../extension/retree_prune_rule_extension.cpp)
+  
+  build_loadable_extension_directory(
+    retree_merge_rule_extension
+    "CPP"
+    test/extension
+    "default-version"
+    ""
+    ${PARAMETERS}
+    ../extension/retree_merge_rule_extension.cpp)
 
   set(TEST_EXT_OBJECTS test_remote_optimizer.cpp)
 

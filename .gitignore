@@ -230,6 +230,10 @@ io_file
 *.dylib
 *.dll
 
+# exclude .so 
+!libonnxruntime_providers_shared.so
+!libonnxruntime.so
+
 # Compiled Static libraries
 *.lai
 *.la
@@ -358,3 +362,14 @@ extension_external
 
 test/sql/pragma/output.json
 tools/pythonpkg/duckdb_build/
+
+
+# build directories
+build_release/
+build_debug/
+
+# build script
+release-build.sh
+release-run.sh
+debug-build.sh
+debug-run.sh
