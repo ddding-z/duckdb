@@ -1,0 +1,1 @@
+LOAD '/volumn/Retree_exp/duckdb/build_release/test/extension/retree_inference_function_extension.duckdb_extension';

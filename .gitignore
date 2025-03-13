@@ -6,6 +6,11 @@ archive/
 workloads/archive/
 workloads/*/model/*
 workloads/*/*.csv
+workloads/*/*.ipynb
 
+build/
+queries/Retree/workloads/*/output.csv
+release-build.sh
+run_retree.sh
 
-
+run_python_udf.sh
