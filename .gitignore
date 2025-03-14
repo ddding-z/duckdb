@@ -7,6 +7,8 @@ workloads/archive/
 workloads/*/model/*
 workloads/*/*.csv
 workloads/*/*.ipynb
+workloads/*/data-extension/1G/*
+workloads/*/data-extension/10G/*
 
 build/
 queries/Retree/workloads/*/output.csv

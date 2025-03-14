@@ -1,4 +1,4 @@
-CREATE TABLE table1 AS
+CREATE TABLE bike_sharing_demand AS
 SELECT * FROM read_csv('/volumn/duckdb/data/dataset/expanded_data/bike_sharing_demand_?.csv', header=True, columns={
     'datetime': 'DATETIME',
     'season': 'INT64',
