@@ -1,5 +1,5 @@
-CREATE TABLE table1 AS
-SELECT * FROM read_csv('/volumn/duckdb/data/dataset/expanded_data/wine_quality_?.csv', header=True, columns={
+CREATE TABLE wine_quality AS
+SELECT * FROM read_csv('/volumn/Retree_exp/workloads/wine_quality/data-extension/?/wine_quality.csv', header=True, columns={
     'fixed_acidity': 'FLOAT',
     'volatile_acidity': 'FLOAT',
     'citric_acid': 'FLOAT',

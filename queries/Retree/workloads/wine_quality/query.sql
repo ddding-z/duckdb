@@ -2,10 +2,10 @@ EXPLAIN ANALYZE
 SELECT
     count(*)
 FROM
-    table1
+    wine_quality
 WHERE
     predict (
-        '/volumn/duckdb/data/model/?.onnx',
+        '/volumn/Retree_exp/workloads/wine_quality/model/?.onnx',
         fixed_acidity,
         volatile_acidity,
         citric_acid,

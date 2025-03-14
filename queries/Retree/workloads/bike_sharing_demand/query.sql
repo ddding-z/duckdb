@@ -5,7 +5,7 @@ FROM
         bike_sharing_demand
 WHERE
         predict (
-                '/volumn/duckdb/data/model/?.onnx',
+                '/volumn/Retree_exp/workloads/bike_sharing_demand/model/?.onnx',
                 EXTRACT(
                         HOUR
                         FROM

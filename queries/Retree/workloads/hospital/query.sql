@@ -2,10 +2,10 @@ EXPLAIN ANALYZE
 SELECT
     COUNT(*)
 FROM
-    table1
+    hospital
 WHERE
     predict (
-        '/volumn/duckdb/data/model/?.onnx',
+        '/volumn/Retree_exp/workloads/hospital/model/?.onnx',
         hematocrit,
         neutrophils,
         -- sodium,

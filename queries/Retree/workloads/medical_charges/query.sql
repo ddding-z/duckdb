@@ -2,10 +2,10 @@ EXPLAIN ANALYZE
 SELECT
     count(*)
 FROM
-    table1
+    medical_charges
 WHERE
     predict (
-        '/volumn/duckdb/data/model/?.onnx',
+        '/volumn/Retree_exp/workloads/medical_charges/model/?.onnx',
         Total_Discharges,
         Average_Covered_Charges,
         Average_Medicare_Payments

@@ -11,7 +11,7 @@ WHERE
     and S_routes.sairportid = R2_sairports.sairportid
     and S_routes.dairportid = R3_dairports.dairportid
     and predict (
-        '/volumn/duckdb/data/model/?.onnx',
+        '/volumn/Retree_exp/workloads/flights/model/?.onnx',
         slatitude,
         slongitude,
         dlatitude,

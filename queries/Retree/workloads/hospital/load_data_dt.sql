@@ -1,5 +1,5 @@
-CREATE TABLE table1 AS
-SELECT * FROM read_csv('/volumn/duckdb/data/dataset/expanded_data/hospital_?.csv', header=True, columns={
+CREATE TABLE hospital AS
+SELECT * FROM read_csv('/volumn/Retree_exp/workloads/hospital/data-extension/?/hospital.csv', header=True, columns={
     'eid': 'INT64',
     'vdate': 'DATE',
     'rcount': 'VARCHAR',

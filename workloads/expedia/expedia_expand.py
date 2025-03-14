@@ -32,7 +32,7 @@ X_expanded_1G = pd.concat([X] * scale_1G, ignore_index=True)
 data = pd.merge(
     pd.merge(X_expanded_1G, R1_hotels, how="inner"), R2_searches, how="inner"
 )
-data.to_csv("expedia_1G.csv", index=False)
+# data.to_csv("expedia_1G.csv", index=False)
 X_expanded_1G.to_csv(outpath1 + path1, index=False)
 
 # expand to 10G

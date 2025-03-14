@@ -2,10 +2,10 @@ EXPLAIN ANALYZE
 SELECT
     count(*)
 FROM
-    table1
+    nyc-taxi-green-dec-2016
 WHERE
     predict (
-        '/volumn/duckdb/data/model/?.onnx',
+        '/volumn/Retree_exp/workloads/nyc-taxi-green-dec-2016/model/?.onnx',
         passenger_count,
         tolls_amount,
         total_amount,
