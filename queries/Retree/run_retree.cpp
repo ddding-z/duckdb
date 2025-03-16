@@ -139,6 +139,8 @@ void run(const Config &config)
 	std::string threads = replacePlaceholder("set threads = ?;", "?", config.thread);
 	con.Query(threads);
 
+	// auto result = con.Query(replacePlaceholder(read_file(sql_path + "load_data.sql"), "?", config.scale));
+	// auto result = outputfile << result->ToString() << "\n";
 	con.Query(replacePlaceholder(read_file(sql_path + "load_data.sql"), "?", config.scale));
 	for (const auto &predicate : predicates)
 	{
@@ -152,6 +154,8 @@ void run(const Config &config)
 		while (count--)
 		{
 			auto start = std::chrono::high_resolution_clock::now();
+			// auto result = con.Query(sql);
+			// outputfile << result->ToString() << "\n";
 			con.Query(sql);
 			auto end = std::chrono::high_resolution_clock::now();
 			std::chrono::duration<double, std::milli> duration = end - start;
