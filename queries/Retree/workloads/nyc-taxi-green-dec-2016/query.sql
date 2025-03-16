@@ -2,7 +2,7 @@ EXPLAIN ANALYZE
 SELECT
     count(*)
 FROM
-    nyc-taxi-green-dec-2016
+    nyc_taxi_green_dec_2016
 WHERE
     predict (
         '/volumn/Retree_exp/workloads/nyc-taxi-green-dec-2016/model/?.onnx',

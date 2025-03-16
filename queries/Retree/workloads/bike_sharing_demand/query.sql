@@ -6,11 +6,11 @@ FROM
 WHERE
         predict (
                 '/volumn/Retree_exp/workloads/bike_sharing_demand/model/?.onnx',
-                EXTRACT(
+                CAST (EXTRACT(
                         HOUR
                         FROM
                                 bike_sharing_demand.datetime
-                ),
+                )) AS FLOAT,
                 atemp,
                 humidity,
                 windspeed,

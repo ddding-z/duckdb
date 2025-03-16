@@ -1,14 +1,19 @@
 __pycache__/
 *.pyc
 
+*.onnx
+
+settings.json
+.vscode
+
 archive/
 
 workloads/archive/
 workloads/*/model/*
-workloads/*/*.csv
-workloads/*/*.ipynb
 workloads/*/data-extension/1G/*
 workloads/*/data-extension/10G/*
+*.csv
+*.ipynb
 
 build/
 queries/Retree/workloads/*/output.csv

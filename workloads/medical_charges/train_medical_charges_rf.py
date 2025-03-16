@@ -1,4 +1,5 @@
 import numpy as np
+import onnxoptimizer
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -98,11 +99,15 @@ percentile_values(pred, model_name)
 
 # convert and save model
 type_map = {
-    "int64": Int64TensorType([None, 1]),
+    # "int64": Int64TensorType([None, 1]),
+    "int64": FloatTensorType([None, 1]),
     "float32": FloatTensorType([None, 1]),
     "float64": FloatTensorType([None, 1]),
     "object": StringTensorType([None, 1]),
 }
 init_types = [(elem, type_map[X[elem].dtype.name]) for elem in input_columns]
 model_onnx = convert_sklearn(pipeline, initial_types=init_types)
-onnx.save_model(model_onnx, onnx_path)
+
+# optimize model
+optimized_model = onnxoptimizer.optimize(model_onnx)
+onnx.save_model(optimized_model, onnx_path)

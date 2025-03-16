@@ -1,4 +1,5 @@
 import numpy as np
+import onnxoptimizer
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -106,6 +107,15 @@ type_map = {
     "float64": FloatTensorType([None, 1]),
     "object": StringTensorType([None, 1]),
 }
-init_types = [(elem, type_map[X[elem].dtype.name]) for elem in input_columns]
+original_init_types = [(elem, type_map[X[elem].dtype.name]) for elem in input_columns]
+
+init_types = [
+    (name, FloatTensorType(shape=[None, 1]) if name == 'humidity' else tensor_type)
+    for name, tensor_type in original_init_types
+]
+
 model_onnx = convert_sklearn(pipeline, initial_types=init_types)
-onnx.save_model(model_onnx, onnx_path)
+
+# optimize model
+optimized_model = onnxoptimizer.optimize(model_onnx)
+onnx.save_model(optimized_model, onnx_path)

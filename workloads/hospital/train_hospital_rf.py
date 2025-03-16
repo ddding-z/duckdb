@@ -10,6 +10,7 @@ import onnx
 import datetime
 from skl2onnx import convert_sklearn
 from onnxconverter_common import FloatTensorType, Int64TensorType, StringTensorType
+import onnxoptimizer
 import argparse
 
 import sys
@@ -129,12 +130,30 @@ plot_value_distribution(pred, model_name)
 percentile_values(pred, model_name)
 
 # convert and save model
-type_map = {
-    "int64": Int64TensorType([None, 1]),
-    "float32": FloatTensorType([None, 1]),
-    "float64": FloatTensorType([None, 1]),
-    "object": StringTensorType([None, 1]),
-}
-init_types = [(elem, type_map[X[elem].dtype.name]) for elem in input_columns]
+# type_map = {
+#     "int64": Int64TensorType([None, 1]),
+#     "float32": FloatTensorType([None, 1]),
+#     "float64": FloatTensorType([None, 1]),
+#     "object": StringTensorType([None, 1]),
+# }
+# init_types = [(elem, type_map[X[elem].dtype.name]) for elem in input_columns]
+
+init_types = [
+    ("hematocrit", FloatTensorType(shape=[None, 1])),
+    ("neutrophils", FloatTensorType(shape=[None, 1])),
+    ("glucose", FloatTensorType(shape=[None, 1])),
+    ("bloodureanitro", FloatTensorType(shape=[None, 1])),
+    ("bmi", FloatTensorType(shape=[None, 1])),
+    ("pulse", FloatTensorType(shape=[None, 1])),
+    ("respiration", FloatTensorType(shape=[None, 1])),
+    ("rcount", StringTensorType(shape=[None, 1])),
+    ("asthma", Int64TensorType(shape=[None, 1])),
+    ("pneum", Int64TensorType(shape=[None, 1])),
+    ("hemo", Int64TensorType(shape=[None, 1])),
+]
+
 model_onnx = convert_sklearn(pipeline, initial_types=init_types)
-onnx.save_model(model_onnx, onnx_path)
+
+# optimize model
+optimized_model = onnxoptimizer.optimize(model_onnx)
+onnx.save_model(optimized_model, onnx_path)

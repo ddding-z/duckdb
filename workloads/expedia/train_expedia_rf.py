@@ -1,6 +1,7 @@
 import argparse
 import datetime
 import numpy as np
+import onnxoptimizer
 import pandas as pd
 import onnx
 from sklearn.ensemble import RandomForestClassifier
@@ -41,7 +42,7 @@ args = parser.parse_args()
 data_name = "expedia"
 tree_num = args.tree_num
 tree_depth = args.tree_depth
-label = "promotion_flag"
+label = "position"
 
 path1 = "S_listings.csv"
 path2 = "R1_hotels.csv"
@@ -53,6 +54,8 @@ R1_hotels = pd.read_csv(path2)
 R2_searches = pd.read_csv(path3)
 
 data = pd.merge(pd.merge(S_listings, R1_hotels, how="inner"), R2_searches, how="inner")
+data[label] = data[label].str.replace("'", "")
+data[label] = data[label].replace({"0": 0, "1": 1}).astype("int")
 data.dropna(inplace=True)
 # data.head(2048).to_csv(f"{data_name}-2048.csv", index=False)
 # data.to_csv(f"{data_name}.csv", index=False)
@@ -61,34 +64,33 @@ data.dropna(inplace=True)
 numerical = [
     "prop_location_score1",
     "prop_location_score2",
-    "prop_log_historical_price",
-    "price_usd",
+    # "prop_log_historical_price",
+    # "price_usd",
     "orig_destination_distance",
     "prop_review_score",
     "avg_bookings_usd",
-    "stdev_bookings_usd",
+    # "stdev_bookings_usd",
+    "count_bookings",
+    "count_clicks",
 ]
 categorical = [
-    "position",
-    "prop_country_id",
+    # "promotion_flag",
+    # "prop_country_id",
     "prop_starrating",
     "prop_brand_bool",
-    "count_clicks",
-    "count_bookings",
-    "year",
-    "month",
-    "weekofyear",
-    "time",
-    "site_id",
-    "visitor_location_country_id",
-    "srch_destination_id",
-    "srch_length_of_stay",
-    "srch_booking_window",
-    "srch_adults_count",
-    "srch_children_count",
-    "srch_room_count",
-    "srch_saturday_night_bool",
-    "random_bool",
+    # "year",
+    # "month",
+    # "weekofyear",
+    # "time",
+    # "site_id",
+    # "visitor_location_country_id",
+    # "srch_destination_id",
+    # "srch_length_of_stay",
+    # "srch_booking_window",
+    # "srch_adults_count",
+    # "srch_children_count",
+    # "srch_room_count",
+    # "srch_saturday_night_bool",
 ]
 input_columns = numerical + categorical
 
@@ -140,12 +142,30 @@ pred = pipeline.predict(X)
 value_distribution(pred, model_name)
 
 # convert and save model
-type_map = {
-    "int64": Int64TensorType([None, 1]),
-    "float32": FloatTensorType([None, 1]),
-    "float64": FloatTensorType([None, 1]),
-    "object": StringTensorType([None, 1]),
-}
-init_types = [(elem, type_map[X[elem].dtype.name]) for elem in input_columns]
+# type_map = {
+#     "int64": Int64TensorType([None, 1]),
+#     "float32": FloatTensorType([None, 1]),
+#     "float64": FloatTensorType([None, 1]),
+#     "object": StringTensorType([None, 1]),
+# }
+# init_types = [(elem, type_map[X[elem].dtype.name]) for elem in input_columns]
+
+init_types = [
+    ("prop_location_score1", FloatTensorType(shape=[None, 1])),
+    ("prop_location_score2", FloatTensorType(shape=[None, 1])),
+    # ("price_usd", FloatTensorType(shape=[None, 1])),
+    ("orig_destination_distance", FloatTensorType(shape=[None, 1])),
+    ("prop_review_score", FloatTensorType(shape=[None, 1])),
+    ("avg_bookings_usd", FloatTensorType(shape=[None, 1])),
+    ("count_bookings", FloatTensorType(shape=[None, 1])),
+    ("count_clicks", FloatTensorType(shape=[None, 1])),
+    ("prop_starrating", Int64TensorType(shape=[None, 1])),
+    ("prop_brand_bool", Int64TensorType(shape=[None, 1])),
+    # ("srch_saturday_night_bool", Int64TensorType(shape=[None, 1])),
+]
+
 model_onnx = convert_sklearn(pipeline, initial_types=init_types)
-onnx.save_model(model_onnx, onnx_path)
+
+# optimize model
+optimized_model = onnxoptimizer.optimize(model_onnx)
+onnx.save_model(optimized_model, onnx_path)

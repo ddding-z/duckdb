@@ -1,5 +1,6 @@
 from collections import Counter
 import numpy as np
+import onnxoptimizer
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -100,4 +101,7 @@ type_map = {
 }
 init_types = [(elem, type_map[X[elem].dtype.name]) for elem in input_columns]
 model_onnx = convert_sklearn(pipeline, initial_types=init_types)
-onnx.save_model(model_onnx, onnx_path)
+
+# optimize model
+optimized_model = onnxoptimizer.optimize(model_onnx)
+onnx.save_model(optimized_model, onnx_path)

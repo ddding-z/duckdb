@@ -7,7 +7,7 @@ SELECT * FROM read_csv('/volumn/Retree_exp/workloads/bike_sharing_demand/data-ex
     'weather': 'INT64',
     'temp': 'FLOAT',
     'atemp': 'FLOAT',
-    'humidity': 'INT64',
+    'humidity': 'FLOAT',
     'windspeed': 'FLOAT',
     'casual': 'INT64',
     'registered': 'INT64'

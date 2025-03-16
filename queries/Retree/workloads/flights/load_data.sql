@@ -6,7 +6,7 @@ SELECT * FROM read_csv('/volumn/Retree_exp/workloads/flights/data-extension/?/S_
 });
 
 CREATE TABLE R1_airlines AS
-SELECT * FROM read_csv('/volumn/Retree_exp/workloads/flights/data-extension/?/R1_airlines.csv', header=True, columns={
+SELECT * FROM read_csv('/volumn/Retree_exp/workloads/flights/data-extension/R1_airlines.csv', header=True, columns={
     'airlineid': 'INT64',
     'name1': 'INT64',
     'name2': 'VARCHAR',
@@ -16,7 +16,7 @@ SELECT * FROM read_csv('/volumn/Retree_exp/workloads/flights/data-extension/?/R1
 });
 
 CREATE TABLE R2_sairports AS
-SELECT * FROM read_csv('/volumn/Retree_exp/workloads/flights/data-extension/?/R2_sairports.csv', header=True, columns={
+SELECT * FROM read_csv('/volumn/Retree_exp/workloads/flights/data-extension/R2_sairports.csv', header=True, columns={
     'sairportid': 'INT64',
     'scity': 'VARCHAR',
     'scountry': 'VARCHAR',
@@ -27,7 +27,7 @@ SELECT * FROM read_csv('/volumn/Retree_exp/workloads/flights/data-extension/?/R2
 });
 
 CREATE TABLE R3_dairports AS
-SELECT * FROM read_csv('/volumn/Retree_exp/workloads/flights/data-extension/?/R3_dairports.csv', header=True, columns={
+SELECT * FROM read_csv('/volumn/Retree_exp/workloads/flights/data-extension/R3_dairports.csv', header=True, columns={
     'dairportid': 'INT64',
     'dcity': 'VARCHAR',
     'dcountry': 'VARCHAR',

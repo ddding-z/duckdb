@@ -2,30 +2,29 @@ CREATE TABLE S_listings AS
 SELECT * FROM read_csv('/volumn/Retree_exp/workloads/expedia/data-extension/?/S_listings.csv', header=True, columns={
     'srch_id': 'INT64',
     'prop_id': 'INT64',
-    "position": 'VARCHAR',
     "prop_location_score1": 'FLOAT',
     "prop_location_score2": 'FLOAT',
     "prop_log_historical_price": 'FLOAT',
     "price_usd": 'FLOAT',
-    "promotion_flag" : 'INT64',
+    "promotion_flag": 'INT64',
     "orig_destination_distance" : 'FLOAT'
 });
 
 CREATE TABLE R1_hotels AS
-SELECT * FROM read_csv('/volumn/Retree_exp/workloads/expedia/data-extension/?/R1_hotels.csv', header=True, columns={
+SELECT * FROM read_csv('/volumn/Retree_exp/workloads/expedia/data-extension/R1_hotels.csv', header=True, columns={
     'prop_id': 'INT64',
     "prop_country_id": 'VARCHAR',
     "prop_starrating": 'INT64',
     "prop_review_score": 'FLOAT',
     "prop_brand_bool": 'INT64',
-    "count_clicks": 'INT64',
+    "count_clicks": 'FLOAT',
     "avg_bookings_usd": 'FLOAT',
     "stdev_bookings_usd": 'FLOAT',
-    "count_bookings": 'INT64'
+    "count_bookings": 'FLOAT'
 });
 
 CREATE TABLE R2_searches AS
-SELECT * FROM read_csv('/volumn/Retree_exp/workloads/expedia/data-extension/?/R2_searches.csv', header=True, columns={
+SELECT * FROM read_csv('/volumn/Retree_exp/workloads/expedia/data-extension/R2_searches.csv', header=True, columns={
     'srch_id': 'INT64',
     "year": 'VARCHAR',
     "month": 'VARCHAR',

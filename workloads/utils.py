@@ -42,15 +42,11 @@ def percentile_values(data, filename):
     percentiles_5 = np.arange(5, 101, 5)
 
     with open(f"model/{filename}.txt", "w", encoding="utf-8") as f:
-        f.write("1~100% (1%)\n")
-        for p in percentiles_1:
-            value = np.percentile(sorted_data, p)
-            f.write(f"{round(value, 3)}\n")
+        values = [f"{round(np.percentile(sorted_data, p), 3)}" for p in percentiles_1]
+        f.write("\n".join(values))
     with open(f"model/predicates.txt", "w", encoding="utf-8") as f:
-        for p in percentiles_5:
-            value = np.percentile(sorted_data, p)
-            f.write(f"{round(value, 3)}\n")
-        f.write("\n")
+        values = [f"{round(np.percentile(sorted_data, p), 3)}" for p in percentiles_5]
+        f.write("\n".join(values))
 
 
 def value_distribution(data, filename):

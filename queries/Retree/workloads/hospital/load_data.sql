@@ -22,7 +22,7 @@ SELECT * FROM read_csv('/volumn/Retree_exp/workloads/hospital/data-extension/?/h
     'bloodureanitro': 'FLOAT',
     'creatinine': 'FLOAT',
     'bmi': 'FLOAT',
-    'pulse': 'INT64',
+    'pulse': 'FLOAT',
     'respiration': 'FLOAT',
     'secondarydiagnosisnonicd9': 'INT64',
     'discharged': 'DATE',
