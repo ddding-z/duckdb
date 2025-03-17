@@ -25,13 +25,14 @@ def plot_value_distribution(data, filename):
     plt.savefig(f"model/{filename}.png")
     plt.close()
 
-def plot_hist(data, filename):
-    plt.hist(data, bins=20, edgecolor='black')
 
-    plt.title('Histogram of Random Data')
-    plt.xlabel('Value')
-    plt.ylabel('Frequency')
-    
+def plot_hist(data, filename):
+    plt.hist(data, bins=20, edgecolor="black")
+
+    plt.title("Histogram of Random Data")
+    plt.xlabel("Value")
+    plt.ylabel("Frequency")
+
     plt.savefig(f"model/{filename}_hist.png")
     plt.close()
 
@@ -54,3 +55,21 @@ def value_distribution(data, filename):
     with open(f"model/{filename}.txt", "w", encoding="utf-8") as f:
         for item, count in counter.items():
             f.write(f"{item}: {(count/data.shape[0])*100}%\n")
+
+
+def plot_feature_importances(model, shape, filename):
+    importances = model.feature_importances_
+    std = np.std([tree.feature_importances_ for tree in model.estimators_], axis=0)
+    indices = np.argsort(importances)[::-1]
+
+    # Plotting the feature importances of the forest
+    plt.figure()
+    plt.title("Feature importances")
+    plt.bar(
+        range(shape), importances[indices], color="r", yerr=std[indices], align="center"
+    )
+    plt.xticks(range(shape), indices)
+    plt.xlim([-1, shape])
+
+    plt.savefig(f"model/{filename}_feature_importances.png")
+    plt.close()

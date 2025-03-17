@@ -1,7 +1,7 @@
 CREATE TABLE S_sales AS
 SELECT * FROM read_csv('/volumn/Retree_exp/workloads/walmart/data-extension/?/S_sales.csv', header=True, columns={
     'sid': 'INT64',
-    'dept': 'VARCHAR',
+    'dept': 'INT64',
     'store': 'INT64',
     'purchaseid': 'VARCHAR'
 });
@@ -24,6 +24,6 @@ SELECT * FROM read_csv('/volumn/Retree_exp/workloads/walmart/data-extension/R1_i
 CREATE TABLE R2_stores AS
 SELECT * FROM read_csv('/volumn/Retree_exp/workloads/walmart/data-extension/R2_stores.csv', header=True, columns={
     'store': 'INT64',
-    'type': 'VARCHAR',
+    'type': 'INT64',
     'size': 'FLOAT'
 });

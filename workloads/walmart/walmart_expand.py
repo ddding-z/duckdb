@@ -16,10 +16,14 @@ S_sales = pd.read_csv(path1)
 R1_indicators = pd.read_csv(path2)
 R2_stores = pd.read_csv(path3)
 
+R2_stores["store"] = R2_stores["store"].str.replace("'", "").astype("int")
+
 R1_indicators.to_csv(outpath3 + path2, index=False)
 R2_stores.to_csv(outpath3 + path3, index=False)
 
 S_sales['purchaseid'] = S_sales['purchaseid'].str.replace("'", "")
+S_sales["store"] = S_sales["store"].str.replace("'", "").astype("int")
+S_sales["dept"] = S_sales["dept"].str.replace("'", "").astype("int")
 
 X = S_sales.drop('weekly_sales', axis=1)
 X_expanded = pd.concat([X] * scale_1G, ignore_index=True)

@@ -17,7 +17,7 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from utils import value_distribution
+from utils import plot_feature_importances, value_distribution
 
 """ 
 walmart:
@@ -61,39 +61,46 @@ R2_stores = pd.read_csv(path3)
 S_sales["purchaseid"] = S_sales["purchaseid"].str.replace("'", "")
 S_sales["weekly_sales"] = S_sales["weekly_sales"].str.replace("'", "").astype("int")
 data = pd.merge(pd.merge(S_sales, R1_indicators, how="inner"), R2_stores, how="inner")
+data["store"] = data["store"].str.replace("'", "").astype("int")
+data["dept"] = data["dept"].str.replace("'", "").astype("int")
+data["type"] = data["type"].str.replace("'", "").astype("int")
 
 data.dropna(inplace=True)
-# data.head(2048).to_csv("/volumn/Retree_exp/data/walmart/walmart-2048.csv", index=False)
-# data.to_csv("/volumn/Retree_exp/data/walmart/walmart.csv", index=False)
+data.head(2048).to_csv("/volumn/Retree_exp/workloads/walmart/walmart-2048.csv", index=False)
+data.to_csv("/volumn/Retree_exp/workloads/walmart/walmart.csv", index=False)
 
 # 2 categorical, 10 numerical
 numerical = [
-    "temperature_avg",
-    "temperature_stdev",
+    # "temperature_avg",
+    # "temperature_stdev",
     "fuel_price_avg",
     "fuel_price_stdev",
-    "cpi_avg",
-    "cpi_stdev",
-    "unemployment_avg",
-    "unemployment_stdev",
+    # "cpi_avg",
+    # "cpi_stdev",
+    # "unemployment_avg",
+    # "unemployment_stdev",
     "holidayfreq",
     "size",
+    "type",
+    "store",
+    "dept"
 ]
-categorical = [
-    # "dept",
-    "type"
-]
-input_columns = numerical + categorical
+# categorical = [
+#     # "dept",
+#     "type"
+# ]
+input_columns = numerical
+# input_columns = numerical + categorical
 
 
 preprocessor = ColumnTransformer(
     transformers=[
         ("num", "passthrough", numerical),
-        (
-            "cat",
-            OneHotEncoder(handle_unknown="ignore"),
-            categorical,
-        ),
+        # (
+        #     "cat",
+        #     OneHotEncoder(handle_unknown="ignore"),
+        #     categorical,
+        # ),
     ]
 )
 
@@ -135,6 +142,7 @@ onnx_path = f"model/{model_name}.onnx"
 # save model pred distribution
 pred = pipeline.predict(X)
 value_distribution(pred, model_name)
+plot_feature_importances(model, X.shape[1], model_name)
 
 # convert and save model
 type_map = {

@@ -10,18 +10,17 @@ WHERE
     and S_sales.store = R2_stores.store
     and predict (
         '/volumn/Retree_exp/workloads/walmart/model/?.onnx',
-        temperature_avg,
-        temperature_stdev,
+        -- temperature_avg,
+        -- temperature_stdev,
         fuel_price_avg,
         fuel_price_stdev,
-        cpi_avg,
-        cpi_stdev,
-        unemployment_avg,
-        unemployment_stdev,
+        -- cpi_avg,
+        -- cpi_stdev,
+        -- unemployment_avg,
+        -- unemployment_stdev,
         holidayfreq,
         size,
-        -- dept,
-        type
+        CAST(type AS FLOAT),
+        CAST(S_sales.store AS FLOAT),
+        CAST(dept AS FLOAT)
     ) = ?;
-
-    

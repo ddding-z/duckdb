@@ -89,6 +89,7 @@ customer = pd.read_table(
     index_col=False,
     nrows=500000,
 )
+# customer.head(2048).to_csv('customer.csv', index = False)
 orders = pd.read_table(
     path3,
     names=[
@@ -105,6 +106,7 @@ orders = pd.read_table(
     sep="|",
     index_col=False,
 )
+# orders.head(2048).to_csv('orders.csv', index = False)
 nation = pd.read_table(
     path4,
     names=["n_nationkey", "n_name", "n_regionkey", "n_comment"],
