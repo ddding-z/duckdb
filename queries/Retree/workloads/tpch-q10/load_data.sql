@@ -1,0 +1,1 @@
+ATTACH '/volumn/Retree_exp/workloads/tpch-q10/data-extension/tpch-sf_?.db' AS tpch_db;

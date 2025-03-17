@@ -12,7 +12,10 @@ workloads/archive/
 workloads/*/model/*
 workloads/*/data-extension/1G/*
 workloads/*/data-extension/10G/*
+
+*.tbl
 *.csv
+*.db
 *.ipynb
 
 build/

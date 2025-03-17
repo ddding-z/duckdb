@@ -11,16 +11,16 @@ WHERE
     and predict (
         '/volumn/Retree_exp/workloads/walmart/model/?.onnx',
         temperature_avg,
-        -- temperature_stdev,
+        temperature_stdev,
         fuel_price_avg,
-        -- fuel_price_stdev,
+        fuel_price_stdev,
         cpi_avg,
-        -- cpi_stdev,
+        cpi_stdev,
         unemployment_avg,
-        -- unemployment_stdev,
+        unemployment_stdev,
         holidayfreq,
         size,
-        dept,
+        -- dept,
         type
     ) = ?;
 

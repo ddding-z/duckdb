@@ -1,17 +1,16 @@
-import argparse
-import datetime
 import numpy as np
 import onnxoptimizer
 import pandas as pd
-import onnx
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+import onnx
+import datetime
 from skl2onnx import convert_sklearn
 from onnxconverter_common import FloatTensorType, Int64TensorType, StringTensorType
+import argparse
 
 import sys
 import os
@@ -20,75 +19,48 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from utils import value_distribution
 
 """ 
-flights:
+tpcai-uc08:
 多表分类任务
-              precision    recall  f1-score   support
 
-           0       0.80      0.96      0.87       513
-           1       0.60      0.19      0.29       153
+mse: 0.15457174146049696
+rmsle: 0.23555262282642453
+r2: 0.571661716545319
 
-    accuracy                           0.79       666
-   macro avg       0.70      0.58      0.58       666
-weighted avg       0.75      0.79      0.74       666
-
-python train_flights_rf.py -tn 100 -td 10
+# python train_tpcai-uc08_rf.py -tn 100 -td 10
 """
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--tree_num", "-tn", type=int, default=100)
 parser.add_argument("--tree_depth", "-td", type=int, default=10)
 args = parser.parse_args()
 
-data_name = "flights"
-tree_num = args.tree_num
+data_name = "tpcai-uc08-train"
 tree_depth = args.tree_depth
-label = "codeshare"
-
-path1 = "S_routes.csv"
-path2 = "R1_airlines.csv"
-path3 = "R2_sairports.csv"
-path4 = "R3_dairports.csv"
+tree_num = args.tree_num
+label = "trip_type"
 
 # load data
-S_routes = pd.read_csv(path1)
-R1_airlines = pd.read_csv(path2)
-R2_sairports = pd.read_csv(path3)
-R3_dairports = pd.read_csv(path4)
+data_path = f"{data_name}.csv"
+data = pd.read_csv(data_path)
 
-data = pd.merge(
-    pd.merge(pd.merge(S_routes, R1_airlines, how="inner"), R2_sairports, how="inner"),
-    R3_dairports,
-    how="inner",
-)
-data.dropna(inplace=True)
-data[label] = data[label].replace({"f": 0, "t": 1}).astype("int")
-# data.head(2048).to_csv('/volumn/Retree_exp/data/flights/flights-2048.csv', index=False)
-# data.to_csv('/volumn/Retree_exp/data/flights/flights.csv', index=False)
+data.columns = data.columns.str.replace(' ', '_')
+data.columns = data.columns.str.replace('/', '_')
+data.columns = data.columns.str.replace(',', '')
+data.columns = data.columns.str.replace('-', '')
+data.columns = data.columns.str.replace('&', '')
+data.columns = data.columns.str.replace('1HR', 'HR')
 
-# choose feature: 4 numerical, 13 categorical
-numerical = ["slatitude", "slongitude", "dlatitude", "dlongitude"]
-categorical = [
-    # "acountry",
-    "active",
-    # "scity",
-    # "scountry",
-    # "stimezone",
-    "sdst",
-    # "dcity",
-    # "dcountry",
-    # "dtimezone",
-    "ddst",
-]
-input_columns = numerical + categorical
+# choose feature: 4 numerical
+X = data.drop(label, axis=1)
+input_columns = list(X.columns)
 
 # define pipeline
 preprocessor = ColumnTransformer(
     transformers=[
-        ("num", "passthrough", numerical),
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical),
+        ("num", "passthrough", input_columns),
     ]
 )
-
 pipeline = Pipeline(
     steps=[
         ("preprocessor", preprocessor),
@@ -102,19 +74,16 @@ pipeline = Pipeline(
 )
 
 # define data
-X = data.loc[:, input_columns]
 y = np.array(data.loc[:, label].values)
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.01, random_state=42
 )
 
-# train
 pipeline.fit(X_train, y_train)
 y_pred = pipeline.predict(X_test)
 print(f"{classification_report(y_test, y_pred)}")
 
-# define path
 model = pipeline.named_steps["Classifier"]
 depth = [model.estimators_[i].get_depth() for i in range(tree_num)]
 leaves = [model.estimators_[i].get_n_leaves() for i in range(tree_num)]

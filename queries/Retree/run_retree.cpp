@@ -140,7 +140,7 @@ void run(const Config &config)
 	con.Query(threads);
 
 	// auto result = con.Query(replacePlaceholder(read_file(sql_path + "load_data.sql"), "?", config.scale));
-	// auto result = outputfile << result->ToString() << "\n";
+	// outputfile << result->ToString() << "\n";
 	con.Query(replacePlaceholder(read_file(sql_path + "load_data.sql"), "?", config.scale));
 	for (const auto &predicate : predicates)
 	{

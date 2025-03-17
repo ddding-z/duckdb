@@ -23,10 +23,10 @@ WHERE
         active,
         -- scity,
         -- scountry,
-        stimezone,
+        -- stimezone,
         sdst,
         -- dcity,
         -- dcountry,
-        dtimezone,
+        -- dtimezone,
         ddst
     ) = ?;
