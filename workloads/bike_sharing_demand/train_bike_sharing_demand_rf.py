@@ -16,7 +16,7 @@ import argparse
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from utils import plot_value_distribution, percentile_values
+from utils import plot_feature_importances, plot_value_distribution, percentile_values
 
 """ 
 bike sharing demand:
@@ -99,6 +99,7 @@ onnx_path = f"model/{model_name}.onnx"
 pred = pipeline.predict(X)
 plot_value_distribution(pred, model_name)
 percentile_values(pred, model_name)
+plot_feature_importances(model, 16, model_name)
 
 # convert and save model
 type_map = {

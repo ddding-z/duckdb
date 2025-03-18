@@ -17,7 +17,7 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from utils import plot_hist, plot_value_distribution, percentile_values
+from utils import plot_feature_importances, plot_hist, plot_value_distribution, percentile_values
 
 """ 
 nyc-taxi-green-dec-2016:
@@ -106,6 +106,7 @@ onnx_path = f"model/{model_name}.onnx"
 pred = pipeline.predict(X)
 plot_value_distribution(pred, model_name)
 percentile_values(pred, model_name)
+plot_feature_importances(model, X.shape[1], model_name)
 # plot_hist(pred, model_name)
 
 # convert and save model

@@ -16,7 +16,7 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from utils import value_distribution
+from utils import plot_feature_importances, value_distribution
 
 """ 
 wine quality:
@@ -109,6 +109,7 @@ onnx_path = f"model/{model_name}.onnx"
 # save model pred distribution
 pred = pipeline.predict(X)
 value_distribution(pred, model_name)
+plot_feature_importances(model, X.shape[1], model_name)
 
 # convert and save model
 type_map = {

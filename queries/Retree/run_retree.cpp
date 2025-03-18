@@ -104,6 +104,33 @@ Config parse_args(int argc, char *argv[])
 	return config;
 }
 
+void getFeatureFrequncey(const Config &config, const std::string &predicate){
+	std::string model_full_path = MODEL_PATH + config.workload + "/model/" + config.model;
+	if (config.optimization_level == 0) {
+		// model_full_path += ".onnx";
+	} else if (config.optimization_level == 2) {
+		auto threshold = std::stof(predicate);
+		if (config.model_type.find("clf") != std::string::npos) {
+			model_full_path += "_reg_pruned"+ std::to_string(threshold);
+		} else{
+			threshold /= 100;
+			model_full_path += "_pruned"+ std::to_string(threshold);
+		}
+	} else if (config.optimization_level == 3) {
+		auto threshold = std::stof(predicate);
+		if (config.model_type.find("clf") != std::string::npos) {
+			model_full_path += "_reg_pruned"+ std::to_string(threshold) + "_merged";
+		} else{
+			threshold /= 100;
+			model_full_path += "_pruned"+ std::to_string(threshold) + "_merged";
+		}
+	}
+	// std::cout << model_full_path << std::endl;
+
+	std::string cmd = "python feature_frequency.py -m " + model_full_path;
+	system(cmd.c_str());
+}
+
 void run(const Config &config)
 {
 	duckdb::DBConfig db_config;
@@ -171,6 +198,8 @@ void run(const Config &config)
 				   << config.thread << "," << config.optimization_level << "," << average << "\n";
 		std::cout << config.workload << "," << config.model << "," << predicate << "," << config.scale << ","
 				  << config.thread << "," << config.optimization_level << "," << average << std::endl;
+
+		getFeatureFrequncey(config, predicate);
 
 		if (config.optimization_level == 0)
 			break;

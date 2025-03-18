@@ -17,7 +17,7 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from utils import value_distribution
+from utils import value_distribution, plot_feature_importances
 
 """ 
 flights:
@@ -66,7 +66,12 @@ data[label] = data[label].replace({"f": 0, "t": 1}).astype("int")
 # data.to_csv('/volumn/Retree_exp/data/flights/flights.csv', index=False)
 
 # choose feature: 4 numerical, 13 categorical
-numerical = ["slatitude", "slongitude", "dlatitude", "dlongitude"]
+numerical = [
+    "slatitude",
+    # "slongitude",
+    # "dlatitude",
+    # "dlongitude"
+]
 categorical = [
     # "acountry",
     "active",
@@ -127,6 +132,7 @@ onnx_path = f"model/{model_name}.onnx"
 # save model pred distribution
 pred = pipeline.predict(X)
 value_distribution(pred, model_name)
+plot_feature_importances(model, X.shape[1], model_name)
 
 # convert and save model
 type_map = {

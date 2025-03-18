@@ -1,6 +1,8 @@
 from collections import Counter
 from matplotlib import pyplot as plt
 import numpy as np
+from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 
 def get_attribute(onnx_model, attr_name):
@@ -57,7 +59,7 @@ def value_distribution(data, filename):
             f.write(f"{item}: {(count/data.shape[0])*100}%\n")
 
 
-def plot_feature_importances(model, shape, filename):
+def plot_feature_importances_v1(model, shape, filename):
     importances = model.feature_importances_
     std = np.std([tree.feature_importances_ for tree in model.estimators_], axis=0)
     indices = np.argsort(importances)[::-1]
@@ -72,4 +74,35 @@ def plot_feature_importances(model, shape, filename):
     plt.xlim([-1, shape])
 
     plt.savefig(f"model/{filename}_feature_importances.png")
+    plt.close()
+
+
+def plot_feature_importances(model, shape, filename):
+    n_features = 0
+    features = []
+    
+    if type(model) is DecisionTreeClassifier or type(model) is DecisionTreeRegressor:
+        n_features = model.tree_.n_features
+        features = list(model.tree_.feature)
+    
+    elif type(model) is RandomForestClassifier or type(model) is RandomForestRegressor:
+        for tree in model.estimators_:
+            n_features = tree.tree_.n_features
+            features += list(tree.tree_.feature)
+    else:
+        raise Exception("???")
+    
+    xy = dict(Counter(features))
+    del xy[-2]
+
+    # Plotting the feature importances of the forest
+    plt.figure()
+    plt.title("Feature frequency")
+    plt.bar(
+        xy.keys(), xy.values(), color="r", align="center"
+    )
+    # plt.xticks(range(shape), indices)
+    # plt.xlim([-1, shape])
+
+    plt.savefig(f"model/{filename}_feature_frequency.png")
     plt.close()

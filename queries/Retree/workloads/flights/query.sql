@@ -13,9 +13,9 @@ WHERE
     and predict (
         '/volumn/Retree_exp/workloads/flights/model/?.onnx',
         slatitude,
-        slongitude,
-        dlatitude,
-        dlongitude,
+        -- slongitude,
+        -- dlatitude,
+        -- dlongitude,
         -- name1,
         -- name2,
         -- name4,
