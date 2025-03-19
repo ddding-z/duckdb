@@ -20,7 +20,4 @@ workloads/*/data-extension/10G/*
 
 build/
 queries/Retree/workloads/*/output.csv
-release-build.sh
-run_retree.sh
-
-run_python_udf.sh
+*.sh

@@ -23,9 +23,8 @@ from utils import plot_hist, plot_value_distribution, percentile_values
 tpch-q9:
 多表回归任务
 
-mse: 0.15457174146049696
-rmsle: 0.23555262282642453
-r2: 0.571661716545319
+mse: 2205876.8447108986
+r2: 0.993009605279969
 
 # python train_tpch-q9_rf.py -tn 100 -td 10
 """

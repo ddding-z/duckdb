@@ -1,9 +1,12 @@
 from collections import Counter
 from matplotlib import pyplot as plt
 import numpy as np
-from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
+from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier, plot_tree
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
+from pyecharts import options as opts
+from pyecharts.charts import Tree
+import tree
 
 def get_attribute(onnx_model, attr_name):
     i = 0
@@ -106,3 +109,46 @@ def plot_feature_importances(model, shape, filename):
 
     plt.savefig(f"model/{filename}_feature_frequency.png")
     plt.close()
+
+def plot_sklearn_tree(model, model_name, input_columns, y_test):
+    # plt.figure(figsize=(20, 10))
+    plt.figure()
+    plot_tree(model, filled=True, feature_names=input_columns, class_names=list(map(str, list(set(y_test)))), rounded=True)
+    plt.savefig(f"model/{model_name}.png")
+    plt.close()
+
+def plot_tree_charts(model, model_name):
+    trees = tree.model2trees(model, None)
+
+    data = trees[0].toEchartsJSON()
+
+    c = (
+        Tree(
+            init_opts=opts.InitOpts(
+                width="100%",
+                height="2000px",
+            ),
+        )
+        .add(
+            f"{model_name}",
+            [data],
+            pos_top="10%",
+            pos_left="10%",
+            pos_bottom="10%",
+            pos_right="10%",
+            is_roam=True,
+            collapse_interval=0,
+            orient="LR",
+            label_opts=opts.LabelOpts(
+                position="top",
+                horizontal_align="right",
+                vertical_align="middle",
+                rotate=0,
+            ),
+        )
+        .set_global_opts(
+            title_opts=opts.TitleOpts(title="Tree"),
+            datazoom_opts=opts.DataZoomOpts(is_zoom_on_mouse_wheel="alt"),
+        )
+        .render(f"{model_name}.html")
+    )
