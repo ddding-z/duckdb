@@ -45,13 +45,13 @@ def plot_hist(data, filename):
 def percentile_values(data, filename):
     sorted_data = np.sort(data)
     percentiles_1 = np.arange(1, 101)
-    percentiles_5 = np.arange(5, 101, 5)
+    percentiles_10 = [1, 2, 3, 4, 5, 95, 96, 97, 98, 99]
 
     with open(f"model/{filename}.txt", "w", encoding="utf-8") as f:
         values = [f"{round(np.percentile(sorted_data, p), 3)}" for p in percentiles_1]
         f.write("\n".join(values))
     with open(f"model/predicates.txt", "w", encoding="utf-8") as f:
-        values = [f"{round(np.percentile(sorted_data, p), 3)}" for p in percentiles_5]
+        values = [f"{round(np.percentile(sorted_data, p), 3)}" for p in percentiles_10]
         f.write("\n".join(values))
 
 
