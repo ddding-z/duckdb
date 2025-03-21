@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <regex>
 
 std::string LOAD_PATH = "/volumn/Retree_exp/queries/Retree/common/";
 std::string SQL_PATH = "/volumn/Retree_exp/queries/Retree/workloads/";
@@ -29,7 +30,6 @@ struct Config
 	std::string thread = "4";
 	int times = 7;
 	int optimization_level = 3;
-	int naive = 0;
 	int debug = 0;
 };
 
@@ -37,7 +37,7 @@ Config parse_args(int argc, char *argv[])
 {
 	Config config;
 	int opt;
-	while ((opt = getopt(argc, argv, "t:w:o:m:s:y:n:d:")) != -1)
+	while ((opt = getopt(argc, argv, "t:w:o:m:s:n:d:")) != -1)
 	{
 		switch (opt)
 		{
@@ -46,9 +46,6 @@ Config parse_args(int argc, char *argv[])
 			break;
 		case 'm':
 			config.model = optarg;
-			break;
-		case 'y':
-			config.model_type = optarg;
 			break;
 		case 's':
 			config.scale = optarg;
@@ -59,15 +56,12 @@ Config parse_args(int argc, char *argv[])
 		case 'o':
 			config.optimization_level = atoi(optarg);
 			break;
-		case 'n':
-			config.naive = atoi(optarg);
-			break;
 		case 'd':
-			config.naive = atoi(optarg);
+			config.debug = atoi(optarg);
 			break;
 		default:
 			std::cerr << "Usage: " << argv[0]
-					  << " [-w workloads] [-m model] [-y model_type] [-s scale] [-t threads] [-o optimization_level] [-n naive] [-d debug]\n";
+					  << " [-w workloads] [-m model] [-s scale] [-t threads] [-o optimization_level] [-d debug]\n";
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -155,7 +149,7 @@ void run(const Config &config)
 {
 	std::string sql_path = SQL_PATH + config.workload + "/";
 	std::ofstream outputfile;
-	config.model_type.find("rf") != std::string::npos ? outputfile.open(sql_path + "output.csv", std::ios::app) : outputfile.open(sql_path + "output-dt.csv", std::ios::app);
+	outputfile.open(sql_path + "output.csv", std::ios::app);
 
 	duckdb::DBConfig db_config;
 	db_config.options.allow_unsigned_extensions = true;
@@ -167,17 +161,18 @@ void run(const Config &config)
 	con.Query("set allow_extensions_metadata_mismatch=true;");
 	con.Query(read_file(LOAD_PATH + "load_inference_function.sql"));
 
-	if (config.optimization_level >= 1)
+	if (config.optimization_level > 1)
 	{
 		con.Query(read_file(LOAD_PATH + "load_convert_rule.sql"));
-	}
-	if (config.optimization_level >= 2)
-	{
 		con.Query(read_file(LOAD_PATH + "load_prune_rule.sql"));
 	}
-	if (config.optimization_level >= 3)
+	if (config.optimization_level == 3)
 	{
-		config.naive == 0 ? con.Query(read_file(LOAD_PATH + "load_merge_rule.sql")) : con.Query(read_file(LOAD_PATH + "load_naive_merge_rule.sql"));
+		con.Query(read_file(LOAD_PATH + "load_merge_rule.sql"));
+	}
+	else if (config.optimization_level == 4)
+	{
+		con.Query(read_file(LOAD_PATH + "load_naive_merge_rule.sql"));
 	}
 
 	std::vector<std::string> predicates = read_predicates(sql_path + "predicates.txt");
@@ -191,6 +186,10 @@ void run(const Config &config)
 	for (const auto &predicate : predicates)
 	{
 		std::string sql = read_file(sql_path + "query.sql");
+		if (config.optimization_level == 1)
+		{
+			sql = replacePlaceholder(sql, "predict", "forge");
+		}
 		sql = replacePlaceholder(sql, "?", config.model);
 		sql = replacePlaceholder(sql, "?", predicate);
 
@@ -210,10 +209,10 @@ void run(const Config &config)
 		double sum = std::accumulate(records.begin(), records.end(), 0.0) - maxminvals;
 		double average = sum / (records.size() - 2);
 
-		outputfile << config.workload << "," << config.model << "," << predicate << "," << config.scale << ","
-				   << config.thread << "," << config.optimization_level << "," << config.naive << average << "\n";
-		std::cout << config.workload << "," << config.model << "," << predicate << "," << config.scale << ","
-				  << config.thread << "," << config.optimization_level << "," << config.naive << average << "\n";
+		outputfile << config.workload << "," << config.model << "," << config.model_type << predicate << "," << config.scale << ","
+				   << config.thread << "," << config.optimization_level << average << "\n";
+		std::cout << config.workload << "," << config.model << "," << config.model_type << predicate << "," << config.scale << ","
+				  << config.thread << "," << config.optimization_level << average << "\n";
 
 		if (config.optimization_level == 0)
 			break;
@@ -234,17 +233,18 @@ void debug(const Config &config)
 
 	con.Query(read_file(LOAD_PATH + "load_inference_function.sql"));
 
-	if (config.optimization_level >= 1)
+	if (config.optimization_level > 1)
 	{
 		con.Query(read_file(LOAD_PATH + "load_convert_rule.sql"));
-	}
-	if (config.optimization_level >= 2)
-	{
 		con.Query(read_file(LOAD_PATH + "load_prune_rule.sql"));
 	}
-	if (config.optimization_level >= 3)
+	if (config.optimization_level == 3)
 	{
-		config.naive == 0 ? con.Query(read_file(LOAD_PATH + "load_merge_rule.sql")) : con.Query(read_file(LOAD_PATH + "load_naive_merge_rule.sql"));
+		con.Query(read_file(LOAD_PATH + "load_merge_rule.sql"));
+	}
+	else if (config.optimization_level == 4)
+	{
+		con.Query(read_file(LOAD_PATH + "load_naive_merge_rule.sql"));
 	}
 
 	std::string sql_path = SQL_PATH + config.workload + "/";
@@ -269,11 +269,12 @@ void debug(const Config &config)
 		outputfile << result->ToString() << "\n";
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double, std::milli> duration = end - start;
+		auto average = duration.count();
 
-		outputfile << config.workload << "," << config.model << "," << predicate << "," << config.scale << ","
-				   << config.thread << "," << config.optimization_level << "," << config.naive << duration.count() << "\n";
-		std::cout << config.workload << "," << config.model << "," << predicate << "," << config.scale << ","
-				  << config.thread << "," << config.optimization_level << "," << config.naive << duration.count() << "\n";
+		outputfile << config.workload << "," << config.model << "," << config.model_type << predicate << "," << config.scale << ","
+				   << config.thread << "," << config.optimization_level << average << "\n";
+		std::cout << config.workload << "," << config.model << "," << config.model_type << predicate << "," << config.scale << ","
+				  << config.thread << "," << config.optimization_level << average << "\n";
 
 		break;
 	}
@@ -283,6 +284,16 @@ void debug(const Config &config)
 int main(int argc, char *argv[])
 {
 	Config config = parse_args(argc, argv);
+
+	std::regex rf_pattern("t100");
+	if (regex_search(config.model, rf_pattern)){
+		config.model_type = "rf";
+		config.thread = 4;
+	} else {
+		config.model_type = "dt";
+		config.thread = 1;
+	}
+	
 	config.debug == 0 ? run(config) : debug(config);
 	return 0;
 }

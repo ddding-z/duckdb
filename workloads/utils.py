@@ -6,6 +6,9 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from pyecharts import options as opts
 from pyecharts.charts import Tree
 from typing import List, Tuple
+import onnx
+from onnx import helper
+import onnx.checker
 
 def get_attribute(onnx_model, attr_name):
     i = 0

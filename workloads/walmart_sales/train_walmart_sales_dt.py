@@ -53,9 +53,9 @@ data_name = "walmart_sales"
 tree_depth = args.tree_depth
 label = "Weekly_Sales"
 
-path1 = "train.csv"
-path2 = "features.csv"
-path3 = "stores.csv"
+path1 = "data/train.csv"
+path2 = "data/features.csv"
+path3 = "data/stores.csv"
 
 sales = pd.read_csv(path1)  # sales : train
 features = pd.read_csv(path2)
@@ -125,9 +125,9 @@ data["Christmas"] = data["Christmas"].astype(bool).astype(int)
 data["IsHoliday"] = data["IsHoliday"].astype(bool).astype(int)
 
 # data.head(2048).to_csv(
-#     f"/volumn/Retree_exp/workloads/{data_name}/{data_name}-2048.csv", index=False
+#     f"data/{data_name}-2048.csv", index=False
 # )
-# data.to_csv(f"/volumn/Retree_exp/workloads/{data_name}/{data_name}.csv", index=False)
+# data.to_csv(f"data/{data_name}.csv", index=False)
 
 
 # 2 categorical, 10 numerical
@@ -223,5 +223,7 @@ optimized_model = onnxoptimizer.optimize(model_onnx)
 onnx.save_model(optimized_model, onnx_path)
 
 
+
+
 with open(f"/volumn/Retree_exp/queries/Retree/workloads/workload_models.csv", "a", encoding="utf-8") as f:
-    f.write(f"{data_name},{model_name}")
+    f.write(f"{data_name},{model_name}\n")
