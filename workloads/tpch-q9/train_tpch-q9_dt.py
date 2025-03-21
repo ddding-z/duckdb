@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_squared_log_error, r2_score
 import onnx
@@ -16,100 +16,71 @@ import argparse
 import sys
 import os
 
+from sklearn.tree import DecisionTreeRegressor
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from utils import plot_value_distribution, percentile_values
+from utils import plot_hist, plot_value_distribution, percentile_values
 
 """ 
-hospital:
-单表回归任务
+tpch-q9:
+多表回归任务
 
-mse: 0.9106147416794484
-rmsle: 0.2137308344851731
-r2: 0.8315769528499954
+mse: 2205876.8447108986
+r2: 0.993009605279969
 
-mse: 1.4679760200630425
-rmsle: 0.27903800773305554
-r2: 0.7284900154524548
-
-python train_hospital_dt.py -td 10
+python train_tpch-q9_dt.py -td 10
 """
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--tree_depth", "-td", type=int, default=10)
 args = parser.parse_args()
 
-data_name = "hospital"
+data_name = "tpch-q9"
 tree_depth = args.tree_depth
-label = "lengthofstay"
+label = "amount"
 
 # load data
 data_path = f"{data_name}.csv"
 data = pd.read_csv(data_path)
 # data.head(2048).to_csv(f"{data_name}-2048.csv", index=False)
 
-# choose feature: 4 numerical, 4 categorical
+# choose feature: 4 numerical
 numerical = [
-    "hematocrit",
-    "neutrophils",
-    # "sodium",
-    "glucose",
-    "bloodureanitro",
-    # "creatinine",
-    "bmi",
-    "pulse",
-    "respiration",
-    # "secondarydiagnosisnonicd9",
+    "l_extendedprice",
+    "l_discount",
+    "ps_supplycost",
+    "l_quantity",
 ]
-categorical = [
-    "rcount",
-    # "gender",
-    # "dialysisrenalendstage",
-    "asthma",
-    # "irondef",
-    "pneum",
-    # "substancedependence",
-    # "psychologicaldisordermajor",
-    # "depress",
-    # "psychother",
-    # "fibrosisandother",
-    # "malnutrition",
-    "hemo",
-]
-input_columns = numerical + categorical
+input_columns = numerical
 
 # define pipeline
 preprocessor = ColumnTransformer(
     transformers=[
-        ("num", "passthrough", numerical),
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical),
+        ("num", "passthrough", input_columns),
     ]
 )
-
 pipeline = Pipeline(
     steps=[
         ("preprocessor", preprocessor),
-        (
-            "Regressor",
-            DecisionTreeRegressor(max_depth=tree_depth),
-        ),
+        ("Regressor", DecisionTreeRegressor(max_depth=tree_depth)),
     ]
 )
 
 # define data
 X = data.loc[:, input_columns]
 y = np.array(data.loc[:, label].values)
+
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.01, random_state=42
 )
 
-# train
 pipeline.fit(X_train, y_train)
 y_pred = pipeline.predict(X_test)
 print(f"mse: {mean_squared_error(y_test, y_pred)}")
-print(f"rmsle: {np.sqrt(mean_squared_log_error(y_test, y_pred))}")
+# print(f"rmsle: {np.sqrt(mean_squared_log_error(y_test, y_pred))}")
 print(f"r2: {r2_score(y_test, y_pred)}")
 
-# define path
 model = pipeline.named_steps["Regressor"]
 depth = model.get_depth()
 leaves = model.get_n_leaves()
@@ -123,6 +94,7 @@ onnx_path = f"model/{model_name}.onnx"
 pred = pipeline.predict(X)
 plot_value_distribution(pred, model_name)
 percentile_values(pred, model_name)
+# plot_hist(pred, model_name)
 
 # convert and save model
 type_map = {

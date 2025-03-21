@@ -159,7 +159,13 @@ void run(const Config &config)
 
 	std::string sql_path = SQL_PATH + config.workload + "/";
 	std::vector<std::string> predicates = read_predicates(MODEL_PATH + config.workload + "/model/predicates.txt");
-	std::ofstream outputfile(sql_path + "output.csv", std::ios::app);
+
+	std::ofstream outputfile;
+	if (config.model_type.find("rf") != std::string::npos) {
+		outputfile.open(sql_path + "output.csv", std::ios::app);
+	} else {
+		outputfile.open(sql_path + "output-dt.csv", std::ios::app);
+	}
 
 	std::vector<double> records;
 
@@ -199,7 +205,7 @@ void run(const Config &config)
 		std::cout << config.workload << "," << config.model << "," << predicate << "," << config.scale << ","
 				  << config.thread << "," << config.optimization_level << "," << average << std::endl;
 
-		getFeatureFrequncey(config, predicate);
+		// getFeatureFrequncey(config, predicate);
 
 		if (config.optimization_level == 0)
 			break;

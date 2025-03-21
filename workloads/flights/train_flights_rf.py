@@ -68,20 +68,20 @@ data[label] = data[label].replace({"f": 0, "t": 1}).astype("int")
 # choose feature: 4 numerical, 13 categorical
 numerical = [
     "slatitude",
-    # "slongitude",
-    # "dlatitude",
-    # "dlongitude"
+    "slongitude",
+    "dlatitude",
+    "dlongitude"
 ]
 categorical = [
-    # "acountry",
+    "acountry",
     "active",
-    # "scity",
-    # "scountry",
-    # "stimezone",
+    "scity",
+    "scountry",
+    "stimezone",
     "sdst",
-    # "dcity",
-    # "dcountry",
-    # "dtimezone",
+    "dcity",
+    "dcountry",
+    "dtimezone",
     "ddst",
 ]
 input_columns = numerical + categorical

@@ -17,7 +17,7 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from utils import value_distribution
+from utils import plot_feature_importances, value_distribution
 
 """ 
 flights:
@@ -31,16 +31,14 @@ flights:
    macro avg       0.70      0.60      0.61       666
 weighted avg       0.76      0.79      0.75       666
 
-python train_flights_rf.py -tn 100 -td 10
+python train_flights_dt.py -td 10
 """
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--tree_num", "-tn", type=int, default=100)
 parser.add_argument("--tree_depth", "-td", type=int, default=10)
 args = parser.parse_args()
 
 data_name = "flights"
-tree_num = args.tree_num
 tree_depth = args.tree_depth
 label = "codeshare"
 
@@ -68,14 +66,14 @@ data[label] = data[label].replace({"f": 0, "t": 1}).astype("int")
 # choose feature: 4 numerical, 13 categorical
 numerical = ["slatitude", "slongitude", "dlatitude", "dlongitude"]
 categorical = [
-    # "acountry",
+    "acountry",
     "active",
-    # "scity",
-    # "scountry",
+    "scity",
+    "scountry",
     "stimezone",
     "sdst",
-    # "dcity",
-    # "dcountry",
+    "dcity",
+    "dcountry",
     "dtimezone",
     "ddst",
 ]
@@ -125,6 +123,7 @@ onnx_path = f"model/{model_name}.onnx"
 # save model pred distribution
 pred = pipeline.predict(X)
 value_distribution(pred, model_name)
+plot_feature_importances(model, X.shape[1], model_name)
 
 # convert and save model
 type_map = {
