@@ -59,6 +59,15 @@ if(NOT WIN32 AND NOT SUN)
     ${PARAMETERS}
     ../extension/retree_merge_rule_extension.cpp)
 
+  build_loadable_extension_directory(
+    retree_naive_merge_rule_extension
+    "CPP"
+    test/extension
+    "default-version"
+    ""
+    ${PARAMETERS}
+    ../extension/retree_naive_merge_rule_extension.cpp)
+
   set(TEST_EXT_OBJECTS test_remote_optimizer.cpp)
 
   add_library_unity(test_extensions OBJECT ${TEST_EXT_OBJECTS})
