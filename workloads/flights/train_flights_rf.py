@@ -73,15 +73,15 @@ numerical = [
     "dlongitude"
 ]
 categorical = [
-    "acountry",
+    # "acountry",
     "active",
-    "scity",
-    "scountry",
-    "stimezone",
+    # "scity",
+    # "scountry",
+    # "stimezone",
     "sdst",
-    "dcity",
-    "dcountry",
-    "dtimezone",
+    # "dcity",
+    # "dcountry",
+    # "dtimezone",
     "ddst",
 ]
 input_columns = numerical + categorical
@@ -132,7 +132,7 @@ onnx_path = f"model/{model_name}.onnx"
 # save model pred distribution
 pred = pipeline.predict(X)
 value_distribution(pred, model_name)
-plot_feature_importances(model, X.shape[1], model_name)
+# plot_feature_importances(model, X.shape[1], model_name)
 
 # convert and save model
 type_map = {

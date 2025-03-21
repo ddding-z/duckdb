@@ -26,7 +26,7 @@ mse: 0.15457174146049696
 rmsle: 0.23555262282642453
 r2: 0.571661716545319
 
-# python train_tpcai-uc08_rf.py -tn 100 -td 10
+python train_tpcai-uc08_rf.py -tn 100 -td 10
 """
 
 

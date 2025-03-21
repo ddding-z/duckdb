@@ -67,13 +67,14 @@ struct Config
 	std::string thread = "4";
 	int times = 5;
 	int optimization_level = 3;
+	int naive = 0;
 };
 
 Config parse_args(int argc, char *argv[])
 {
 	Config config;
 	int opt;
-	while ((opt = getopt(argc, argv, "t:w:o:m:s:y:")) != -1)
+	while ((opt = getopt(argc, argv, "t:w:o:m:s:y:n:")) != -1)
 	{
 		switch (opt)
 		{
@@ -95,34 +96,49 @@ Config parse_args(int argc, char *argv[])
 		case 'o':
 			config.optimization_level = atoi(optarg);
 			break;
+		case 'n':
+			config.naive = atoi(optarg);
+			break;
 		default:
 			std::cerr << "Usage: " << argv[0]
-					  << " [-w workloads] [-m model] [-y model_type] [-s scale] [-t threads] [-o optimization_level]\n";
+					  << " [-w workloads] [-m model] [-y model_type] [-s scale] [-t threads] [-o optimization_level] [-n naive]\n";
 			exit(EXIT_FAILURE);
 		}
 	}
 	return config;
 }
 
-void getFeatureFrequncey(const Config &config, const std::string &predicate){
+void getFeatureFrequncey(const Config &config, const std::string &predicate)
+{
 	std::string model_full_path = MODEL_PATH + config.workload + "/model/" + config.model;
-	if (config.optimization_level == 0) {
+	if (config.optimization_level == 0)
+	{
 		// model_full_path += ".onnx";
-	} else if (config.optimization_level == 2) {
+	}
+	else if (config.optimization_level == 2)
+	{
 		auto threshold = std::stof(predicate);
-		if (config.model_type.find("clf") != std::string::npos) {
-			model_full_path += "_reg_pruned"+ std::to_string(threshold);
-		} else{
-			threshold /= 100;
-			model_full_path += "_pruned"+ std::to_string(threshold);
+		if (config.model_type.find("clf") != std::string::npos)
+		{
+			model_full_path += "_reg_pruned" + std::to_string(threshold);
 		}
-	} else if (config.optimization_level == 3) {
-		auto threshold = std::stof(predicate);
-		if (config.model_type.find("clf") != std::string::npos) {
-			model_full_path += "_reg_pruned"+ std::to_string(threshold) + "_merged";
-		} else{
+		else
+		{
 			threshold /= 100;
-			model_full_path += "_pruned"+ std::to_string(threshold) + "_merged";
+			model_full_path += "_pruned" + std::to_string(threshold);
+		}
+	}
+	else if (config.optimization_level == 3)
+	{
+		auto threshold = std::stof(predicate);
+		if (config.model_type.find("clf") != std::string::npos)
+		{
+			model_full_path += "_reg_pruned" + std::to_string(threshold) + "_merged";
+		}
+		else
+		{
+			threshold /= 100;
+			model_full_path += "_pruned" + std::to_string(threshold) + "_merged";
 		}
 	}
 	// std::cout << model_full_path << std::endl;
@@ -154,16 +170,19 @@ void run(const Config &config)
 	}
 	if (config.optimization_level >= 3)
 	{
-		con.Query(read_file(PATH + "load_merge_rule.sql"));
+		config.naive == 0 ? con.Query(read_file(PATH + "load_merge_rule.sql")) : con.Query(read_file(PATH + "load_naive_merge_rule.sql"));
 	}
 
 	std::string sql_path = SQL_PATH + config.workload + "/";
 	std::vector<std::string> predicates = read_predicates(MODEL_PATH + config.workload + "/model/predicates.txt");
 
 	std::ofstream outputfile;
-	if (config.model_type.find("rf") != std::string::npos) {
+	if (config.model_type.find("rf") != std::string::npos)
+	{
 		outputfile.open(sql_path + "output.csv", std::ios::app);
-	} else {
+	}
+	else
+	{
 		outputfile.open(sql_path + "output-dt.csv", std::ios::app);
 	}
 
