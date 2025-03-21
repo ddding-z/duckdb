@@ -42,9 +42,9 @@ tree_num = args.tree_num
 label = "tipamount"
 
 # load data
-data_path = f"{data_name}.csv"
+data_path = f"data/{data_name}.csv"
 data = pd.read_csv(data_path)
-data.head(2048).to_csv(f"{data_name}-2048.csv", index=False)
+# data.head(2048).to_csv(f"data/{data_name}-2048.csv", index=False)
 
 # choose feature: 3 numerical
 numerical = [
@@ -105,9 +105,7 @@ onnx_path = f"model/{model_name}.onnx"
 # save model pred distribution
 pred = pipeline.predict(X)
 plot_value_distribution(pred, model_name)
-percentile_values(pred, model_name)
-plot_feature_importances(model, X.shape[1], model_name)
-# plot_hist(pred, model_name)
+percentile_values(pred, data_name, model_name)
 
 # convert and save model
 type_map = {
@@ -123,3 +121,7 @@ model_onnx = convert_sklearn(pipeline, initial_types=init_types)
 # optimize model
 optimized_model = onnxoptimizer.optimize(model_onnx)
 onnx.save_model(optimized_model, onnx_path)
+
+
+with open(f"/volumn/Retree_exp/queries/Retree/workloads/workload_models.csv", "a", encoding="utf-8") as f:
+    f.write(f"{data_name},{model_name}")

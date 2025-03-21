@@ -37,8 +37,8 @@ tree_depth = args.tree_depth
 label = "quality"
 
 # load data
-path1 = f"{data_name}-red.csv"
-path2 = f"{data_name}-white.csv"
+path1 = f"data/{data_name}-red.csv"
+path2 = f"data/{data_name}-white.csv"
 
 red = pd.read_csv(path1, sep=';')
 white = pd.read_csv(path2, sep=';')
@@ -46,7 +46,7 @@ white = pd.read_csv(path2, sep=';')
 data = pd.concat([red, white], axis=0, ignore_index=True)
 data.columns = data.columns.str.replace(' ', '_')
 data.columns = data.columns.str.replace('\"', "")
-data.to_csv(f"{data_name}.csv", index=False, sep=',')
+data.to_csv(f"data/{data_name}.csv", index=False, sep=',')
 
 # choose feature: 9 numerical
 numerical = [
@@ -124,3 +124,7 @@ model_onnx = convert_sklearn(pipeline, initial_types=init_types)
 # optimize model
 optimized_model = onnxoptimizer.optimize(model_onnx)
 onnx.save_model(optimized_model, onnx_path)
+
+
+with open(f"/volumn/Retree_exp/queries/Retree/workloads/workload_models.csv", "a", encoding="utf-8") as f:
+    f.write(f"{data_name},{model_name}")

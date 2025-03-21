@@ -8,9 +8,9 @@ path1 = "test.csv"
 path2 = "features.csv"
 path3 = "stores.csv"
 
-outpath1 = "./data-extension/1G/"
-outpath2 = "./data-extension/10G/"
-outpath3 = "./data-extension/"
+outpath1 = "../data-extension/1G/"
+outpath2 = "../data-extension/10G/"
+outpath3 = "../data-extension/"
 
 sales = pd.read_csv(path1)
 features = pd.read_csv(path2)

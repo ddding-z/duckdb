@@ -9,9 +9,9 @@ path2 = "R1_airlines.csv"
 path3 = "R2_sairports.csv"
 path4 = "R3_dairports.csv"
 
-outpath1 = "./data-extension/1G/"
-outpath2 = "./data-extension/10G/"
-outpath3 = "./data-extension/"
+outpath1 = "../data-extension/1G/"
+outpath2 = "../data-extension/10G/"
+outpath3 = "../data-extension/"
 
 S_routes = pd.read_csv(path1).iloc[:, 0:4]
 R1_airlines = pd.read_csv(path2)

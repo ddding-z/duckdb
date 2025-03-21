@@ -1,17 +1,17 @@
 import pandas as pd
 
-# python medical_charges_expand.py
+# python hospital_expand.py
 
-scale_1G = 256
+scale_1G = 1751
 
-path = "medical_charges.csv"
+path = "bike_sharing_demand.csv"
 
-outpath1 = "./data-extension/1G/"
-outpath2 = "./data-extension/10G/"
+outpath1 = "../data-extension/1G/"
+outpath2 = "../data-extension/10G/"
 
 df = pd.read_csv(path)
 
-X = df.drop('AverageTotalPayments', axis=1)
+X = df.drop('count', axis=1)
 X_expanded_1G = pd.concat([X] * scale_1G, ignore_index=True)
 X_expanded_1G.to_csv(outpath1 + path, index=False)
 

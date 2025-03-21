@@ -1,17 +1,17 @@
 import pandas as pd
 
-# python nyc-taxi-green-dec-2016_expand.py
+# python wine_quality_expand.py
 
-scale_1G = 67
+scale_1G = 2960
 
-path = "nyc-taxi-green-dec-2016.csv"
+path = "wine_quality.csv"
 
-outpath1 = "./data-extension/1G/"
-outpath2 = "./data-extension/10G/"
+outpath1 = "../data-extension/1G/"
+outpath2 = "../data-extension/10G/"
 
 df = pd.read_csv(path)
 
-X = df.drop('tipamount', axis=1)
+X = df.drop('quality', axis=1)
 X_expanded_1G = pd.concat([X] * scale_1G, ignore_index=True)
 X_expanded_1G.to_csv(outpath1 + path, index=False)
 

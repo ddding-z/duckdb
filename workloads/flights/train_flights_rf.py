@@ -44,10 +44,10 @@ tree_num = args.tree_num
 tree_depth = args.tree_depth
 label = "codeshare"
 
-path1 = "S_routes.csv"
-path2 = "R1_airlines.csv"
-path3 = "R2_sairports.csv"
-path4 = "R3_dairports.csv"
+path1 = "data/S_routes.csv"
+path2 = "data/R1_airlines.csv"
+path3 = "data/R2_sairports.csv"
+path4 = "data/R3_dairports.csv"
 
 # load data
 S_routes = pd.read_csv(path1)
@@ -62,8 +62,8 @@ data = pd.merge(
 )
 data.dropna(inplace=True)
 data[label] = data[label].replace({"f": 0, "t": 1}).astype("int")
-# data.head(2048).to_csv('/volumn/Retree_exp/data/flights/flights-2048.csv', index=False)
-# data.to_csv('/volumn/Retree_exp/data/flights/flights.csv', index=False)
+# data.head(2048).to_csv(f"data/{data_name}-2048.csv', index=False)
+# data.to_csv('data/{data_name}.csv', index=False)
 
 # choose feature: 4 numerical, 13 categorical
 numerical = [
@@ -147,3 +147,7 @@ model_onnx = convert_sklearn(pipeline, initial_types=init_types)
 # optimize model
 optimized_model = onnxoptimizer.optimize(model_onnx)
 onnx.save_model(optimized_model, onnx_path)
+
+
+with open(f"/volumn/Retree_exp/queries/Retree/workloads/workload_models.csv", "a", encoding="utf-8") as f:
+    f.write(f"{data_name},{model_name}")
