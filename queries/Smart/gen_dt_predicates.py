@@ -2,7 +2,7 @@ import onnx
 import pandas as pd
 from typing import List
 import argparse
-from tree import Node, clf2reg, model2tree
+from utils import Node, model2tree
 
 # 1. 选择率越小，效果越好 vs 选择率越极端（越大或越小），效果越好
 # 2. 扩展的纯 SQL vs SQL + ONNX
@@ -125,25 +125,26 @@ def generate_predicates(input_model, root:'Node', f) -> 'List[Predicate | None]'
 parser = argparse.ArgumentParser()
 parser.add_argument('--workload', '-w', type=str)
 parser.add_argument('--model', '-m', type=str)
-parser.add_argument('--model_type', '-mt', type=str)
 parser.add_argument('--threshold', '-t', type=float)
-# parser.add_argument('--data', '-d', type=str)
 args = parser.parse_args()
 
 workload = args.workload
 model_name = args.model
-model_type = args.model_type
 threshold = args.threshold
-# data_name = args.data
+
+model_type = 'reg'
+if workload == "flights" or  workload == "tpcai-uc08" or workload == 'wine_quality':
+    model_type = 'clf'
 
 func = lambda x: x > threshold if model_type == 'reg' else x == threshold
-  
-model_path = f'/volumn/Retree_exp/workloads/{workload}/model/{model_name}.onnx'
-model = onnx.load(model_path)
+model_path = None
 
+if model_type == "reg": 
+    model_path = f'/volumn/Retree_exp/workloads/{workload}/model/{model_name}.onnx'
 if model_type == 'clf':
-    model = clf2reg(model)
+    model_path = f'/volumn/Retree_exp/workloads/{workload}/model/{model_name}_reg.onnx'
 
+model = onnx.load(model_path)
 feature_names = get_feature_names(model)
 # print(feature_names)
 
@@ -158,51 +159,7 @@ for p in predicates:
             continue
         effective_predicates.append(p)
 
-with open(f"{workload}/predicates.csv", "a", encoding="utf-8") as f:
+with open(f"workloads/{workload}/predicates.csv", "a", encoding="utf-8") as f:
     for p in effective_predicates:
-        # feature_name,lvalue,rvalue,predicate
+        # feature_name,lvalue(<),rvalue(>),predicate
         f.write(f'{feature_names[p.feature_id]},{p.lvalue},{p.rvalue},{threshold}\n')
-        
-        
-# data_path = f'/volumn/ml_predicate/data/{data_name}.csv'
-# data = pd.read_csv(data_path)
-
-# for p in predicates:
-#     count = 0
-#     correct = 0
-#     incorrect = 0
-#     if p is not None:
-#         if p.lvalue == float('inf') and p.rvalue == float('-inf'):
-#             print(f'feature_id: {p.feature_id}, lvalue: {p.lvalue}, rvalue: {p.rvalue}')
-#             continue
-
-#         for _, row in data.iterrows():
-#             feature_value = row.iloc[p.feature_id]
-#             if feature_value < p.lvalue and feature_value > p.rvalue:
-#                 count += 1
-#                 if row.iloc[-1] > threshold:
-#                     correct += 1
-#             else:
-#                 if row.iloc[-1] > threshold:
-#                     incorrect += 1
-#         print(f'feature_id: {p.feature_id}, lvalue: {p.lvalue}, rvalue: {p.rvalue}, count: {count}, satisfy_scale: {round(count/data.shape[0],6)}, correct: {correct}, incorrect: {incorrect}')
-
-# useful_predicates = []
-# for p in predicates:
-#     if p is not None:
-#         if p.lvalue == float('inf') and p.rvalue == float('-inf'):
-#             continue
-#         useful_predicates.append(p)
-
-# count = 0
-# for _, row in data.iterrows():
-#     satisfy = True
-#     for p in useful_predicates:
-#         feature_value = row.iloc[p.feature_id]
-#         if not (feature_value < p.lvalue and feature_value > p.rvalue):
-#             satisfy = False
-#             break
-#     if satisfy:
-#         count += 1
-
-# print(f'useful_predicates: {len(useful_predicates)}, satisfy_scale: {round(count/data.shape[0],6)}')

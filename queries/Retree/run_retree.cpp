@@ -209,12 +209,12 @@ void run(const Config &config)
 		double sum = std::accumulate(records.begin(), records.end(), 0.0) - maxminvals;
 		double average = sum / (records.size() - 2);
 
-		outputfile << config.workload << "," << config.model << "," << config.model_type << predicate << "," << config.scale << ","
-				   << config.thread << "," << config.optimization_level << average << "\n";
-		std::cout << config.workload << "," << config.model << "," << config.model_type << predicate << "," << config.scale << ","
-				  << config.thread << "," << config.optimization_level << average << "\n";
+		outputfile << config.workload << "," << config.model << "," << config.model_type << "," << predicate << "," << config.scale << ","
+				   << config.thread << "," << config.optimization_level << "," << average << "\n";
+		std::cout << config.workload << "," << config.model << "," << config.model_type << "," << predicate << "," << config.scale << ","
+				  << config.thread << "," << config.optimization_level << "," << average << "\n";
 
-		if (config.optimization_level == 0)
+		if (config.optimization_level <= 1 )
 			break;
 	}
 	outputfile.close();
@@ -271,10 +271,10 @@ void debug(const Config &config)
 		std::chrono::duration<double, std::milli> duration = end - start;
 		auto average = duration.count();
 
-		outputfile << config.workload << "," << config.model << "," << config.model_type << predicate << "," << config.scale << ","
-				   << config.thread << "," << config.optimization_level << average << "\n";
-		std::cout << config.workload << "," << config.model << "," << config.model_type << predicate << "," << config.scale << ","
-				  << config.thread << "," << config.optimization_level << average << "\n";
+		outputfile << config.workload << "," << config.model << "," << config.model_type << "," << predicate << "," << config.scale << ","
+				   << config.thread << "," << config.optimization_level << "," << average << "\n";
+		std::cout << config.workload << "," << config.model << "," << config.model_type << "," << predicate << "," << config.scale << ","
+				  << config.thread << "," << config.optimization_level << "," << average << "\n";
 
 		break;
 	}
@@ -288,12 +288,12 @@ int main(int argc, char *argv[])
 	std::regex rf_pattern("t100");
 	if (regex_search(config.model, rf_pattern)){
 		config.model_type = "rf";
-		config.thread = 4;
+		config.thread = "4";
 	} else {
 		config.model_type = "dt";
-		config.thread = 1;
+		config.thread = "1";
 	}
-	
+
 	config.debug == 0 ? run(config) : debug(config);
 	return 0;
 }

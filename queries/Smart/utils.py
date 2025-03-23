@@ -1,18 +1,22 @@
 import numpy as np
+from collections import Counter
+from matplotlib import pyplot as plt
+from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier, plot_tree
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from typing import List, Tuple
 import onnx
 from onnx import helper
 import onnx.checker
-from typing import List, Tuple
 
-def get_attribute(model, attr_name):
+def get_attribute(onnx_model, attr_name):
     i = 0
     while 1:
-        attributes = model.graph.node[i].attribute
+        attributes = onnx_model.graph.node[i].attribute
         for attr in attributes:
             if attr.name == attr_name:
                 return attr
-        i += 1  
-        
+        i += 1
+
 class Node:
     def __init__(
             self,
@@ -141,6 +145,22 @@ class Node:
 
             return sql
 
+    def toEchartsJSON(self) -> dict:
+        if self.mode == b'LEAF':
+            return {
+                'name': f'{self.target_weight:.3f}',
+                'collapsed': False
+            }
+        
+        return {
+            'name': f'x{self.feature_id} <= {self.value:.3f}',
+            'collapsed': False,
+            'children': [
+                self.left.toEchartsJSON(),
+                self.right.toEchartsJSON()
+            ]
+        }
+
 class TreeEnsembleRegressor:
     def __init__(self):
         self.n_targets: int = 1
@@ -266,153 +286,43 @@ class TreeEnsembleRegressor:
             TreeEnsembleRegressor.from_tree_internal(regressor, node.left, tree_no)
             TreeEnsembleRegressor.from_tree_internal(regressor, node.right, tree_no)
 
-def clf2reg(input_model: onnx.ModelProto) -> onnx.ModelProto:
-    # input model attributes
-    # # class_ids: 叶子节点权重对应的类别id
-    input_class_ids = get_attribute(input_model, 'class_ids').ints
-    # # class_nodeids: 叶子节点权重对应的节点id
-    input_class_nodeids = get_attribute(input_model, 'class_nodeids').ints
-    # # class_treeids: 叶子节点权重对应的树id
-    input_class_treeids = get_attribute(input_model, 'class_treeids').ints
-    # # class_weights: 叶子节点权重，即预测值
-    input_class_weights = get_attribute(input_model, 'class_weights').floats
-    # # classlabels_int64s: 类别id
-    input_classlabels_int64s = get_attribute(input_model, 'classlabels_int64s').ints
-    # # nodes_falsenodeids: 右侧分支
-    input_nodes_falsenodeids = get_attribute(input_model, 'nodes_falsenodeids').ints
-    # # nodes_featureids: 特征id
-    input_nodes_featureids = get_attribute(input_model, 'nodes_featureids').ints
-    # # nodes_hitrates
-    input_nodes_hitrates = get_attribute(input_model, 'nodes_hitrates').floats
-    # # nodes_missing_value_tracks_true
-    input_nodes_missing_value_tracks_true = get_attribute(input_model, 'nodes_missing_value_tracks_true').ints
-    # # nodes_modes：节点类型，LEAF表示叶子节点，BRANCH_LEQ表示非叶子节点
-    input_nodes_modes = get_attribute(input_model, 'nodes_modes').strings
-    # # nodes_nodeids
-    input_nodes_nodeids = get_attribute(input_model, 'nodes_nodeids').ints
-    # # nodes_treeids
-    input_nodes_treeids = get_attribute(input_model, 'nodes_treeids').ints
-    # # nodes_truenodeids: 左侧分支
-    input_nodes_truenodeids = get_attribute(input_model, 'nodes_truenodeids').ints
-    # # nodes_values: 阈值，叶子节点的值为0
-    input_nodes_values = get_attribute(input_model, 'nodes_values').floats
-    # # post_transform
-    input_post_transform = get_attribute(input_model, 'post_transform').s
+def get_target_tree_intervals(onnx_model) -> List[Tuple[int, int]]:
+    target_tree_roots: List[int] = []
+    # target_treeids is ordered
+    target_treeids = get_attribute(onnx_model, 'target_treeids').ints
+    next_tree_id = 0
+    for i, tree_id in enumerate(target_treeids):
+        if tree_id == next_tree_id:
+            next_tree_id += 1
+            target_tree_roots.append(i)
 
-    # output model attributes
-    # # n_targets
-    n_targets = 1
+    target_tree_intervals: List[Tuple[int, int]] = []
+    for i, root in enumerate(target_tree_roots):
+        if i == len(target_tree_roots) - 1:
+            end = len(target_treeids)
+        else:
+            end = target_tree_roots[i + 1]
+        target_tree_intervals.append((root, end))
+    return target_tree_intervals
 
-    # # nodes_falsenodeids: 右侧分支
-    nodes_falsenodeids = input_nodes_falsenodeids
+def get_tree_intervals(onnx_model) -> List[Tuple[int, int]]:
+    tree_roots: List[int] = []
+    # nodes_treeids is ordered
+    nodes_treeids = get_attribute(onnx_model, 'nodes_treeids').ints
+    next_tree_id = 0
+    for i, tree_id in enumerate(nodes_treeids):
+        if tree_id == next_tree_id:
+            next_tree_id += 1
+            tree_roots.append(i)
 
-    # # nodes_featureids: 特征id
-    nodes_featureids = input_nodes_featureids
-
-    # # nodes_hitrates
-    nodes_hitrates = input_nodes_hitrates
-
-    # # nodes_missing_value_tracks_true
-    nodes_missing_value_tracks_true = input_nodes_missing_value_tracks_true
-
-    # # nodes_modes：节点类型，LEAF表示叶子节点，BRANCH_LEQ表示非叶子节点
-    nodes_modes = input_nodes_modes
-
-    # # nodes_nodeids
-    nodes_nodeids = input_nodes_nodeids
-
-    # # nodes_treeids
-    nodes_treeids = input_nodes_treeids
-
-    # # nodes_truenodeids: 左侧分支
-    nodes_truenodeids = input_nodes_truenodeids
-
-    # # nodes_values: 阈值，叶子节点的值为0
-    nodes_values = input_nodes_values
-
-    # # post_transform
-    post_transform = input_post_transform
-
-    stride = len(input_classlabels_int64s)
-    if stride == 2:
-        stride = 1
-
-    n_leaf = len(input_class_weights) // stride
-
-    # # target_ids
-    target_ids = []
-    for i in range(n_leaf):
-        target_ids.append(input_class_ids[i * stride])
-
-    # # target_nodeids: 叶子节点的id
-    target_nodeids = []
-    for i in range(n_leaf):
-        target_nodeids.append(input_class_nodeids[i * stride])
-
-    # # target_treeids
-    target_treeids = []
-    for i in range(n_leaf):
-        target_treeids.append(input_class_treeids[i * stride])
-    
-    # # target_weights: 叶子节点的权重，即预测值
-    target_weights = []
-    if stride == 1:
-        # binary mode: only store positive class weight
-        target_weights = [1.0 if w > 0.5 else 0.0 for w in input_class_weights]
-    else:
-        for i in range(n_leaf):
-            targets = input_class_weights[i * stride: (i + 1) * stride]
-            target_weights.append(float(np.argmax(targets)))
-    
-    # node
-    node = helper.make_node(
-        op_type='TreeEnsembleRegressor',
-        inputs=[input_model.graph.input[0].name],
-        outputs=[input_model.graph.output[0].name],
-        name='TreeEnsembleRegressor',
-        domain='ai.onnx.ml',
-        # attributes
-        n_targets=n_targets,
-        nodes_falsenodeids=nodes_falsenodeids,
-        nodes_featureids=nodes_featureids,
-        nodes_hitrates=nodes_hitrates,
-        nodes_missing_value_tracks_true=nodes_missing_value_tracks_true,
-        nodes_modes=nodes_modes,
-        nodes_nodeids=nodes_nodeids,
-        nodes_treeids=nodes_treeids,
-        nodes_truenodeids=nodes_truenodeids,
-        nodes_values=nodes_values,
-        post_transform=post_transform,
-        target_ids=target_ids,
-        target_nodeids=target_nodeids,
-        target_treeids=target_treeids,
-        target_weights=target_weights
-    )
-
-    # graph
-    output = helper.make_tensor_value_info(
-        name=input_model.graph.output[0].name,
-        elem_type=onnx.TensorProto.FLOAT,
-        shape=[None, 1],
-    )
-    graph = helper.make_graph(
-        nodes=[node],
-        name=input_model.graph.name,
-        initializer=[],
-        inputs=input_model.graph.input,
-        outputs=[output],
-    )
-
-    # model
-    output_model = helper.make_model(
-        graph=graph,
-        opset_imports=input_model.opset_import,
-    )
-    output_model.ir_version = input_model.ir_version
-
-    onnx.checker.check_model(output_model)
-
-    return output_model
+    tree_intervals: List[Tuple[int, int]] = []
+    for i, root in enumerate(tree_roots):
+        if i == len(tree_roots) - 1:
+            end = len(nodes_treeids)
+        else:
+            end = tree_roots[i + 1]
+        tree_intervals.append((root, end))
+    return tree_intervals
 
 def model2trees(input_model, samples_list: 'List[int] | None') -> 'List[Node]':
     tree_intervals = get_tree_intervals(input_model)
@@ -504,146 +414,169 @@ def model2tree(input_model, samples_list: 'List[int] | None', node_id, parent: '
 
     return node
 
-def preorder(node: 'Node', nodes: List['Node']):
-    nodes.append(node)
-    if node.mode != b'LEAF':
-        preorder(node.left, nodes)
-        preorder(node.right, nodes)
+def clf2reg(input_model: onnx.ModelProto) -> onnx.ModelProto:
+    # input model attributes
+    # # class_ids: 叶子节点权重对应的类别id
+    input_class_ids = get_attribute(input_model, 'class_ids').ints
+    # # class_nodeids: 叶子节点权重对应的节点id
+    input_class_nodeids = get_attribute(input_model, 'class_nodeids').ints
+    # # class_treeids: 叶子节点权重对应的树id
+    input_class_treeids = get_attribute(input_model, 'class_treeids').ints
+    # # class_weights: 叶子节点权重，即预测值
+    input_class_weights = get_attribute(input_model, 'class_weights').floats
+    # # classlabels_int64s: 类别id
+    input_classlabels_int64s = get_attribute(input_model, 'classlabels_int64s').ints
+    # # nodes_falsenodeids: 右侧分支
+    input_nodes_falsenodeids = get_attribute(input_model, 'nodes_falsenodeids').ints
+    # # nodes_featureids: 特征id
+    input_nodes_featureids = get_attribute(input_model, 'nodes_featureids').ints
+    # # nodes_hitrates
+    input_nodes_hitrates = get_attribute(input_model, 'nodes_hitrates').floats
+    # # nodes_missing_value_tracks_true
+    input_nodes_missing_value_tracks_true = get_attribute(input_model, 'nodes_missing_value_tracks_true').ints
+    # # nodes_modes：节点类型，LEAF表示叶子节点，BRANCH_LEQ表示非叶子节点
+    input_nodes_modes = get_attribute(input_model, 'nodes_modes').strings
+    # # nodes_nodeids
+    input_nodes_nodeids = get_attribute(input_model, 'nodes_nodeids').ints
+    # # nodes_treeids
+    input_nodes_treeids = get_attribute(input_model, 'nodes_treeids').ints
+    # # nodes_truenodeids: 左侧分支
+    input_nodes_truenodeids = get_attribute(input_model, 'nodes_truenodeids').ints
+    # # nodes_values: 阈值，叶子节点的值为0
+    input_nodes_values = get_attribute(input_model, 'nodes_values').floats
+    # # post_transform
+    input_post_transform = get_attribute(input_model, 'post_transform').s
 
-def samplesorder(node: 'Node', nodes: List['Node']):
-    nodes.append(node)
-    if node.mode != b'LEAF':
-        if node.left.samples >= node.right.samples:
-            samplesorder(node.left, nodes)
-            samplesorder(node.right, nodes)
-        else:
-            samplesorder(node.right, nodes)
-            samplesorder(node.left, nodes)
+    n_trees = len(set(input_class_treeids))
 
-# 获取每棵树在叶子节点组成的数组中的区间, 左闭右开
-def get_target_tree_intervals(onnx_model) -> List[Tuple[int, int]]:
-    target_tree_roots: List[int] = []
-    # target_treeids is ordered
-    target_treeids = get_attribute(onnx_model, 'target_treeids').ints
-    next_tree_id = 0
-    for i, tree_id in enumerate(target_treeids):
-        if tree_id == next_tree_id:
-            next_tree_id += 1
-            target_tree_roots.append(i)
+    # output model attributes
+    # # n_targets
+    n_targets = 1
 
-    target_tree_intervals: List[Tuple[int, int]] = []
-    for i, root in enumerate(target_tree_roots):
-        if i == len(target_tree_roots) - 1:
-            end = len(target_treeids)
-        else:
-            end = target_tree_roots[i + 1]
-        target_tree_intervals.append((root, end))
-    return target_tree_intervals
+    # # nodes_falsenodeids: 右侧分支
+    nodes_falsenodeids = input_nodes_falsenodeids
 
-# 获取每棵树在数组中的区间, 左闭右开
-def get_tree_intervals(onnx_model) -> List[Tuple[int, int]]:
-    tree_roots: List[int] = []
-    # nodes_treeids is ordered
-    nodes_treeids = get_attribute(onnx_model, 'nodes_treeids').ints
-    next_tree_id = 0
-    for i, tree_id in enumerate(nodes_treeids):
-        if tree_id == next_tree_id:
-            next_tree_id += 1
-            tree_roots.append(i)
+    # # nodes_featureids: 特征id
+    nodes_featureids = input_nodes_featureids
 
-    tree_intervals: List[Tuple[int, int]] = []
-    for i, root in enumerate(tree_roots):
-        if i == len(tree_roots) - 1:
-            end = len(nodes_treeids)
-        else:
-            end = tree_roots[i + 1]
-        tree_intervals.append((root, end))
-    return tree_intervals
+    # # nodes_hitrates
+    nodes_hitrates = input_nodes_hitrates
 
-#############
-# Test code #
-#############
+    # # nodes_missing_value_tracks_true
+    nodes_missing_value_tracks_true = input_nodes_missing_value_tracks_true
 
-def create_left_tree(node: 'Node', i: int, depth: int):
-    if i == depth:
-        return
+    # # nodes_modes：节点类型，LEAF表示叶子节点，BRANCH_LEQ表示非叶子节点
+    nodes_modes = input_nodes_modes
+
+    # # nodes_nodeids
+    nodes_nodeids = input_nodes_nodeids
+
+    # # nodes_treeids
+    nodes_treeids = input_nodes_treeids
+
+    # # nodes_truenodeids: 左侧分支
+    nodes_truenodeids = input_nodes_truenodeids
+
+    # # nodes_values: 阈值，叶子节点的值为0
+    nodes_values = input_nodes_values
+
+    # # post_transform
+    post_transform = input_post_transform
+
+    stride = len(input_classlabels_int64s)
+    if stride == 2:
+        stride = 1
+
+    n_leaf = len(input_class_weights) // stride
+
+    # # target_ids
+    target_ids = []
+    for i in range(n_leaf):
+        target_ids.append(input_class_ids[i * stride])
+
+    # # target_nodeids: 叶子节点的id
+    target_nodeids = []
+    for i in range(n_leaf):
+        target_nodeids.append(input_class_nodeids[i * stride])
+
+    # # target_treeids
+    target_treeids = []
+    for i in range(n_leaf):
+        target_treeids.append(input_class_treeids[i * stride])
     
-    if i == depth - 1:
-        left = Node(
-            id=i * 2 + 1,
-            feature_id=0,
-            mode=b'LEAF',
-            value=0,
-            target_id=None,
-            target_weight=1.0,
-            samples=1
-        )
+    # # target_weights: 叶子节点的权重，即预测值
+    target_weights = []
+    if stride == 1:
+        # binary mode: only store positive class weight
+        target_weights = [1.0 if w > 0.5 / n_trees else 0.0 for w in input_class_weights]
     else:
-        left = Node(
-            id=i * 2 + 1,
-            feature_id=node.feature_id,
-            mode=b'BRANCH_LEQ',
-            value=node.value - 1,
-            target_id=None,
-            target_weight=None,
-            samples=None
-        )
-    node.left = left
-    left.parent = node
-    create_left_tree(left, i + 1, depth)
-
-    right = Node(
-        id=i * 2 + 2,
-        feature_id=0,
-        mode=b'LEAF',
-        value=0,
-        target_id=None,
-        target_weight=0.0,
-        samples=1
-    )
-    node.right = right
-    right.parent = node
-
-    node.samples = node.left.samples + node.right.samples
-
-def create_right_tree(node: 'Node', i: int, depth: int):
-    if i == depth:
-        return
+        for i in range(n_leaf):
+            targets = input_class_weights[i * stride: (i + 1) * stride]
+            target_weights.append(float(np.argmax(targets)))
     
-    if i == depth - 1:
-        right = Node(
-            id=i * 2 + 1,
-            feature_id=0,
-            mode=b'LEAF',
-            value=0,
-            target_id=None,
-            target_weight=1.0,
-            samples=1
-        )
-    else:
-        right = Node(
-            id=i * 2 + 1,
-            feature_id=node.feature_id,
-            mode=b'BRANCH_LEQ',
-            value=node.value + 1,
-            target_id=None,
-            target_weight=None,
-            samples=None
-        )
-    node.right = right
-    right.parent = node
-    create_right_tree(right, i + 1, depth)
-
-    left = Node(
-        id=i * 2 + 2,
-        feature_id=0,
-        mode=b'LEAF',
-        value=0,
-        target_id=None,
-        target_weight=0.0,
-        samples=1
+    # node
+    node = helper.make_node(
+        op_type='TreeEnsembleRegressor',
+        inputs=[input_model.graph.input[0].name],
+        outputs=[input_model.graph.output[0].name],
+        name='TreeEnsembleRegressor',
+        domain='ai.onnx.ml',
+        # attributes
+        n_targets=n_targets,
+        nodes_falsenodeids=nodes_falsenodeids,
+        nodes_featureids=nodes_featureids,
+        nodes_hitrates=nodes_hitrates,
+        nodes_missing_value_tracks_true=nodes_missing_value_tracks_true,
+        nodes_modes=nodes_modes,
+        nodes_nodeids=nodes_nodeids,
+        nodes_treeids=nodes_treeids,
+        nodes_truenodeids=nodes_truenodeids,
+        nodes_values=nodes_values,
+        post_transform=post_transform,
+        target_ids=target_ids,
+        target_nodeids=target_nodeids,
+        target_treeids=target_treeids,
+        target_weights=target_weights
     )
-    node.left = left
-    left.parent = node
 
-    node.samples = node.left.samples + node.right.samples
+    # 替换
+    # 1. 删除
+    # 2. 新增
+    # 3. 设置图的新输出
+    
+    # target_node_name = 'TreeEnsembleClassifier'
+    # target_node = None
+
+    # # 查找目标节点
+    # for node in input_model.graph.node:
+    #     if node.name == target_node_name:
+    #         target_node = node
+    #         break
+    
+    
+    output = helper.make_tensor_value_info(
+        name=input_model.graph.output[0].name,
+        elem_type=onnx.TensorProto.FLOAT,
+        shape=[None, 1],
+    )
+    graph = helper.make_graph(
+        nodes=[node],
+        name=input_model.graph.name,
+        initializer=[],
+        inputs=input_model.graph.input,
+        outputs=[output],
+    )
+
+    # model
+    output_model = helper.make_model(
+        graph=graph,
+        opset_imports=input_model.opset_import,
+    )
+    output_model.ir_version = input_model.ir_version
+
+    onnx.checker.check_model(output_model)
+    
+    input_model.graph.node.remove()
+    input_model.graph.node.append()
+
+    return output_model

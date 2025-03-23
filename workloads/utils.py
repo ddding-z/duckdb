@@ -114,7 +114,7 @@ def plot_sklearn_tree(model, model_name, input_columns, y_test):
     plt.close()
 
 def plot_tree_charts(model, model_name):
-    trees = tree.model2trees(model, None)
+    trees = model2trees(model, None)
 
     data = trees[0].toEchartsJSON()
 
@@ -418,6 +418,44 @@ class TreeEnsembleRegressor:
         if not is_leaf:
             TreeEnsembleRegressor.from_tree_internal(regressor, node.left, tree_no)
             TreeEnsembleRegressor.from_tree_internal(regressor, node.right, tree_no)
+
+def get_target_tree_intervals(onnx_model) -> List[Tuple[int, int]]:
+    target_tree_roots: List[int] = []
+    # target_treeids is ordered
+    target_treeids = get_attribute(onnx_model, 'target_treeids').ints
+    next_tree_id = 0
+    for i, tree_id in enumerate(target_treeids):
+        if tree_id == next_tree_id:
+            next_tree_id += 1
+            target_tree_roots.append(i)
+
+    target_tree_intervals: List[Tuple[int, int]] = []
+    for i, root in enumerate(target_tree_roots):
+        if i == len(target_tree_roots) - 1:
+            end = len(target_treeids)
+        else:
+            end = target_tree_roots[i + 1]
+        target_tree_intervals.append((root, end))
+    return target_tree_intervals
+
+def get_tree_intervals(onnx_model) -> List[Tuple[int, int]]:
+    tree_roots: List[int] = []
+    # nodes_treeids is ordered
+    nodes_treeids = get_attribute(onnx_model, 'nodes_treeids').ints
+    next_tree_id = 0
+    for i, tree_id in enumerate(nodes_treeids):
+        if tree_id == next_tree_id:
+            next_tree_id += 1
+            tree_roots.append(i)
+
+    tree_intervals: List[Tuple[int, int]] = []
+    for i, root in enumerate(tree_roots):
+        if i == len(tree_roots) - 1:
+            end = len(nodes_treeids)
+        else:
+            end = tree_roots[i + 1]
+        tree_intervals.append((root, end))
+    return tree_intervals
 
 def model2trees(input_model, samples_list: 'List[int] | None') -> 'List[Node]':
     tree_intervals = get_tree_intervals(input_model)
