@@ -80,6 +80,7 @@ public:
 						if (comparison_operator_ == 9) {
 							return true;
 						}
+						// timer
 						// std::ofstream outputfile("/volumn/duckdb/examples/embedded-c++/workload/pruning_cost.txt",
 						//                          std::ios::app);
 						// auto start = std::chrono::high_resolution_clock::now();
@@ -89,11 +90,17 @@ public:
 						// std::chrono::duration<double, std::milli> duration = end - start;
 						// outputfile << "DTPrune time cost (s): " << duration.count() / 1000 << "\n";
 						// outputfile.close();
+
+						// original_model_path: after convert model path 
 						auto opted_model_path = optimize_on_decision_tree_predicate_prune(
 						    original_model_path, comparison_operator_, predicate, threads_count);
 						if (opted_model_path != original_model_path) {
-							// set comparison_expr: result >= 1/2
 							comparison_expr.type = ExpressionType::COMPARE_GREATERTHANOREQUALTO;
+							// std::regex re("_reg(?=\\.onnx$)");
+							// original_model_path = regex_replace(original_model_path, re, "");
+							// float predicate_updated = 1.0f / get_decision_tree_labels_size(original_model_path);
+							// duckdb::Value value(predicate_updated);
+							// set comparison_expr: result >= 1/2
 							duckdb::Value value(0.5f);
 							auto new_constant_expr = std::make_unique<duckdb::BoundConstantExpression>(value);
 							comparison_expr.right = std::move(new_constant_expr);
