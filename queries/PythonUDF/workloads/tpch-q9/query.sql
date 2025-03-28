@@ -28,7 +28,6 @@ from
             and o_orderkey = l_orderkey
             and s_nationkey = n_nationkey
             and predict(
-                '/volumn/Retree_exp/workloads/tpch-q9/model/?.onnx',
                 CAST(l_extendedprice AS FLOAT),
                 CAST(l_discount AS FLOAT),
                 CAST(ps_supplycost AS FLOAT),

@@ -248,7 +248,7 @@ void debug(const Config &config)
 	}
 
 	std::string sql_path = SQL_PATH + config.workload + "/";
-	std::vector<std::string> predicates = read_predicates(MODEL_PATH + config.workload + "/model/predicates.txt");
+	std::vector<std::string> predicates = read_predicates(sql_path + "predicates.txt");
 
 	std::ofstream outputfile;
 	outputfile.open(sql_path + "output-debug.csv", std::ios::app);

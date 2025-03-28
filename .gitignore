@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
+.vscode
 
 *.onnx
 
@@ -16,8 +17,7 @@ workloads/archive/
 workloads/*/model/*
 workloads/*/data-extension/1G/*
 workloads/*/data-extension/10G/*
-
-batch_append.py
+workloads/batch_append.py
 
 *.tbl
 *.csv

@@ -109,13 +109,12 @@ dept_pivot AS (
 )
 
 SELECT
-  COUNT(*)
+  *
 FROM agg_counts a
 LEFT JOIN weekday_pivot wp ON a.o_order_id = wp.o_order_id
 LEFT JOIN dept_pivot dp ON a.o_order_id = dp.o_order_id
 WHERE
     predict (
-        '/volumn/Retree_exp/workloads/tpcai-uc08/model/?.onnx',
     CAST(a.scan_count AS INT64),
     CAST(a.scan_count_abs AS INT64),
     CAST(COALESCE(wp.Friday, 0) AS FLOAT),

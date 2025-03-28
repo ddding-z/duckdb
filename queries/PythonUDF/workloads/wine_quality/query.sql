@@ -1,11 +1,10 @@
 EXPLAIN ANALYZE
 SELECT
-    count(*)
+    *
 FROM
     wine_quality
 WHERE
     predict (
-        '/volumn/Retree_exp/workloads/wine_quality/model/?.onnx',
         fixed_acidity,
         volatile_acidity,
         citric_acid,

@@ -64,18 +64,12 @@ WITH
             INNER JOIN stores st ON s.Store = st.Store
     )
 
--- SELECT
---     *
--- FROM
---     merged_data;
-
 SELECT
-    count(*)
+    *
 FROM
     merged_data
 WHERE
     predict (
-        '/volumn/Retree_exp/workloads/walmart_sales/model/?.onnx',
         Store,
         Dept,
         -- Date,
