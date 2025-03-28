@@ -1,6 +1,6 @@
--- EXPLAIN ANALYZE
+EXPLAIN ANALYZE
 SELECT
-    count(*)
+    *
 FROM
     wine_quality
 WHERE

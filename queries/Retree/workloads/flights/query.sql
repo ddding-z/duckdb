@@ -1,6 +1,6 @@
 EXPLAIN ANALYZE
 SELECT
-    count(*)
+    *
 FROM
     S_routes,
     R1_airlines,

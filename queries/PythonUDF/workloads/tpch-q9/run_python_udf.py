@@ -6,8 +6,7 @@ import numpy as np
 from duckdb.typing import BIGINT, FLOAT
 import re
 
-times = 7
-thread_duckdb = 1
+times = 1
 thread_ort = 1
 
 parser = argparse.ArgumentParser()
@@ -24,18 +23,25 @@ parser.add_argument(
     default="tpch-q9_t100_d10_l1024_n2047_20250321151057",
 )
 parser.add_argument("--scale", "-s", type=str, default="1G")
+parser.add_argument("--thread", "-t", type=int, default=4)
 args = parser.parse_args()
 
 workload = args.workload
 model_name = args.model
 scale = args.scale
+thread_duckdb = args.thread
 
 model_path = f"/volumn/Retree_exp/workloads/{workload}/model/{model_name}.onnx"
 pattern = "t100"
-model_type = "dt"
+model_type = None
+predicates_path = None
 if re.search(pattern, model_name):
     model_type = "rf"
-    thread_duckdb = 4
+    predicates_path = "predicates.txt"
+else:
+    model_type = "dt"
+    predicates_path = "predicates-dt.txt"
+    thread_duckdb = 1
 
 op = ort.SessionOptions()
 op.intra_op_num_threads = thread_ort
@@ -51,7 +57,6 @@ type_map = {
     "float64": np.float32,
     "object": str,
 }
-
 
 def predict(l_extendedprice, l_discount, ps_supplycost, l_quantity):
     columns = [input.name for input in session.get_inputs()]
@@ -85,7 +90,7 @@ with open("load_data.sql", "r") as file:
     load_data = file.read()
 with open("query.sql", "r") as file:
     query = file.read()
-with open("predicates.txt", "r") as file:
+with open(predicates_path, "r") as file:
     predicates = [str(line.strip()) for line in file if line.strip() != ""]
 
 load_data = load_data.replace("?", scale)
@@ -100,8 +105,8 @@ for predicate in predicates:
         duckdb.sql(pquery)
         end = time.time()
         timer.append(end - start)
-    timer.remove(min(timer))
-    timer.remove(max(timer))
+    # timer.remove(min(timer))
+    # timer.remove(max(timer))
     average = sum(timer) / len(timer)
     print(
         f"{workload},{model_name},{model_type},{predicate},{scale},{thread_duckdb},0,{average}"
@@ -110,3 +115,5 @@ for predicate in predicates:
         f.write(
             f"{workload},{model_name},{model_type},{predicate},{scale},{thread_duckdb},0,{average}\n"
         )
+    # only run one predicate
+    break

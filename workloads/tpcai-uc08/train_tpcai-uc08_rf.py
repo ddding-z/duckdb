@@ -35,13 +35,13 @@ parser.add_argument("--tree_num", "-tn", type=int, default=100)
 parser.add_argument("--tree_depth", "-td", type=int, default=10)
 args = parser.parse_args()
 
-data_name = "tpcai-uc08-train"
+data_name = "tpcai-uc08"
 tree_depth = args.tree_depth
 tree_num = args.tree_num
 label = "trip_type"
 
 # load data
-data_path = f"data/{data_name}.csv"
+data_path = f"data/{data_name}-train.csv"
 data = pd.read_csv(data_path)
 
 data.columns = data.columns.str.replace(' ', '_')

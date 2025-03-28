@@ -1,6 +1,6 @@
 EXPLAIN ANALYZE
 SELECT
-    count(*)
+    *
 FROM
     nyc_taxi_green_dec_2016
 WHERE

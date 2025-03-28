@@ -64,13 +64,8 @@ WITH
             INNER JOIN stores st ON s.Store = st.Store
     )
 
--- SELECT
---     *
--- FROM
---     merged_data;
-
 SELECT
-    count(*)
+    *
 FROM
     merged_data
 WHERE

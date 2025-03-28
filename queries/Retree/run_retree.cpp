@@ -28,7 +28,7 @@ struct Config
 	std::string model_type = "rf";
 	std::string scale = "1G";
 	std::string thread = "4";
-	int times = 7;
+	int times = 10;
 	int optimization_level = 3;
 	int debug = 0;
 };
@@ -175,7 +175,16 @@ void run(const Config &config)
 		con.Query(read_file(LOAD_PATH + "load_naive_merge_rule.sql"));
 	}
 
-	std::vector<std::string> predicates = read_predicates(sql_path + "predicates.txt");
+	std::vector<std::string> predicates;
+	if (config.model_type == "rf")
+	{
+		predicates = read_predicates(sql_path + "predicates.txt");
+	}
+	else
+	{
+		predicates = read_predicates(sql_path + "predicates-dt.txt");
+	}
+
 	std::string data = replacePlaceholder(read_file(sql_path + "load_data.sql"), "?", config.scale);
 	std::string threads = replacePlaceholder("set threads = ?;", "?", config.thread);
 
@@ -214,7 +223,7 @@ void run(const Config &config)
 		std::cout << config.workload << "," << config.model << "," << config.model_type << "," << predicate << "," << config.scale << ","
 				  << config.thread << "," << config.optimization_level << "," << average << "\n";
 
-		if (config.optimization_level <= 1 )
+		if (config.optimization_level <= 1)
 			break;
 	}
 	outputfile.close();
@@ -286,10 +295,13 @@ int main(int argc, char *argv[])
 	Config config = parse_args(argc, argv);
 
 	std::regex rf_pattern("t100");
-	if (regex_search(config.model, rf_pattern)){
+	if (regex_search(config.model, rf_pattern))
+	{
 		config.model_type = "rf";
 		config.thread = "4";
-	} else {
+	}
+	else
+	{
 		config.model_type = "dt";
 		config.thread = "1";
 	}

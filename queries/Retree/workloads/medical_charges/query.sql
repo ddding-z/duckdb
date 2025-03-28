@@ -1,6 +1,6 @@
 EXPLAIN ANALYZE
 SELECT
-    count(*)
+    *
 FROM
     medical_charges
 WHERE

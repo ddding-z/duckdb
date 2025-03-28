@@ -6,8 +6,7 @@ import numpy as np
 from duckdb.typing import BIGINT, FLOAT, VARCHAR
 import re
 
-times = 7
-thread_duckdb = 1
+times = 10
 thread_ort = 1
 
 parser = argparse.ArgumentParser()
@@ -24,18 +23,25 @@ parser.add_argument(
     default="flights_t100_d10_l421_n841_20250321151145",
 )
 parser.add_argument("--scale", "-s", type=str, default="1G")
+parser.add_argument("--thread", "-t", type=int, default=4)
 args = parser.parse_args()
 
 workload = args.workload
 model_name = args.model
 scale = args.scale
+thread_duckdb = args.thread
 
 model_path = f"/volumn/Retree_exp/workloads/{workload}/model/{model_name}.onnx"
 pattern = "t100"
-model_type = "dt"
+model_type = None
+predicates_path = None
 if re.search(pattern, model_name):
     model_type = "rf"
-    thread_duckdb = 4
+    predicates_path = "predicates.txt"
+else:
+    model_type = "dt"
+    predicates_path = "predicates-dt.txt"
+    thread_duckdb = 1
   
 op = ort.SessionOptions()
 op.intra_op_num_threads = thread_ort
@@ -82,7 +88,7 @@ with open("load_data.sql", "r") as file:
     load_data = file.read()
 with open("query.sql", "r") as file:
     query = file.read()
-with open("predicates.txt", "r") as file:
+with open(predicates_path, "r") as file:
     predicates = [str(line.strip()) for line in file if line.strip() != ""]
 
 load_data = load_data.replace("?", scale)
@@ -103,3 +109,5 @@ for predicate in predicates:
     print(f"{workload},{model_name},{model_type},{predicate},{scale},{thread_duckdb},0,{average}")
     with open(f"output.csv", "a", encoding="utf-8") as f:
         f.write(f"{workload},{model_name},{model_type},{predicate},{scale},{thread_duckdb},0,{average}\n")
+    # only run one predicate
+    break

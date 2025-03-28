@@ -109,7 +109,7 @@ dept_pivot AS (
 )
 
 SELECT
-  COUNT(*)
+  *
 FROM agg_counts a
 LEFT JOIN weekday_pivot wp ON a.o_order_id = wp.o_order_id
 LEFT JOIN dept_pivot dp ON a.o_order_id = dp.o_order_id
