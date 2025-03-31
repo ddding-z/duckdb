@@ -13,6 +13,8 @@ queries/Retree/workloads/archive
 
 queries/Smart/workloads/
 
+micro/selectivity/workloads/*/query_*.sql
+
 workloads/archive/
 workloads/*/model/*
 workloads/*/data-extension/1G/*

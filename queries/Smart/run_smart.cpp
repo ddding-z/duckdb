@@ -28,7 +28,7 @@ struct Config
     std::string model_type = "rf";
     std::string scale = "1G";
     std::string thread = "4";
-    int times = 7;
+    int times = 10;
     int optimization_level = 3;
     int debug = 0;
 };

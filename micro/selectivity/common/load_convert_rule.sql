@@ -1,0 +1,1 @@
+LOAD '/volumn/Retree_exp/duckdb/build_release/test/extension/retree_convert_rule_extension.duckdb_extension';

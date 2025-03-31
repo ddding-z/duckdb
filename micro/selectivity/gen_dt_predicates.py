@@ -62,13 +62,10 @@ def simplify_predicates_disjunction(predicates) -> 'Predicate | None':
     for p in predicates:
         if p == None:
             return None
-        # print(f'disjunction_before_feature_id: {p.feature_id}, lvalue: {p.lvalue}, rvalue: {p.rvalue}')
         if p.lvalue is not None and p.lvalue > max_value:
             max_value = p.lvalue
         if p.rvalue is not None and p.rvalue < min_value:
             min_value = p.rvalue
-    #     print(f'disjunction_before_feature_id: {p.feature_id}, max_value: {max_value}, min_value: {min_value}')
-    # print(f'disjunction_after_feature_id: {predicates[0].feature_id}, lvalue: {max_value}, rvalue: {min_value}\n')
     return Predicate(predicates[0].feature_id, max_value, min_value)
 
 def simplify_predicates_conjunction(predicates) -> 'Predicate | None':
@@ -78,12 +75,10 @@ def simplify_predicates_conjunction(predicates) -> 'Predicate | None':
     for p in predicates:
         if p == None:
             return None
-        # print(f'conjunction_before_feature_id: {p.feature_id}, lvalue: {p.lvalue}, rvalue: {p.rvalue}')
         if p.lvalue is not None and p.lvalue < min_value:
             min_value = p.lvalue
         if p.rvalue is not None and p.rvalue > max_value:
             max_value = p.rvalue
-    # print(f'conjunction_after_feature_id: {predicates[0].feature_id}, lvalue: {min_value}, rvalue: {max_value}\n')
     return Predicate(predicates[0].feature_id, min_value, max_value)
 
 def generate_predicate(root:'Node', feature_id, f) -> 'Predicate | None':
@@ -116,10 +111,8 @@ def generate_predicate(root:'Node', feature_id, f) -> 'Predicate | None':
 def generate_predicates(input_model, root:'Node', f) -> 'List[Predicate | None]':
     predicates = []
     feature_ids = get_feature_ids(input_model)
-    # print(feature_ids)
     for feature_id in feature_ids:
         predicates.append(generate_predicate(root, feature_id, f))
-        # break
     return predicates    
 
 parser = argparse.ArgumentParser()

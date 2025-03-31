@@ -20,7 +20,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from utils import plot_value_distribution, percentile_values
 
 """ 
-bike sharing demand:
+medical_charges:
 单表回归任务
 
 mse: 0.006082272133699432
