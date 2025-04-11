@@ -21,6 +21,9 @@ workloads/*/data-extension/1G/*
 workloads/*/data-extension/10G/*
 workloads/batch_append.py
 
+figure/
+test-scripts/
+
 *.tbl
 *.csv
 *.db

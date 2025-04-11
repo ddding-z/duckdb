@@ -11,7 +11,7 @@ def get_attribute(onnx_model, attr_name):
                 return attr
         i += 1
 
-
+# w/o, prune, merge(hyperplane), merge(node), merge(one boundary) 
 def nodes_count(path, model_type):
     df = pd.read_csv(path, dtype={"workload": str, "model": str, "predicate": str})
     for row in df.itertuples():
@@ -27,6 +27,7 @@ def nodes_count(path, model_type):
                 f"{row.model}_reg_pruned{str(row.predicate)}",
                 f"{row.model}_reg_pruned{str(row.predicate)}_merged",
                 f"{row.model}_reg_pruned{str(row.predicate)}_naive_merged",
+                f"{row.model}_reg_pruned{str(row.predicate)}_merged_one_boundary",
             ]
         else:
             model_names = [
@@ -34,6 +35,7 @@ def nodes_count(path, model_type):
                 f"{row.model}_pruned{str(row.predicate)}",
                 f"{row.model}_pruned{str(row.predicate)}_merged",
                 f"{row.model}_pruned{str(row.predicate)}_naive_merged",
+                f"{row.model}_pruned{str(row.predicate)}_merged_one_boundary",
             ]
         nodes_nums = [row.workload, model_type]
         for model_name in model_names:

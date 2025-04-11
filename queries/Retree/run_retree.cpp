@@ -166,7 +166,7 @@ void run(const Config &config)
 		con.Query(read_file(LOAD_PATH + "load_convert_rule.sql"));
 		con.Query(read_file(LOAD_PATH + "load_prune_rule.sql"));
 	}
-	if (config.optimization_level == 3)
+	if (config.optimization_level == 3 || config.optimization_level == 5)
 	{
 		con.Query(read_file(LOAD_PATH + "load_merge_rule.sql"));
 	}
@@ -222,7 +222,9 @@ void run(const Config &config)
 				   << config.thread << "," << config.optimization_level << "," << average << "\n";
 		std::cout << config.workload << "," << config.model << "," << config.model_type << "," << predicate << "," << config.scale << ","
 				  << config.thread << "," << config.optimization_level << "," << average << "\n";
-
+		// for test use
+		// if (config.optimization_level <= 3)
+		// 	break;
 		if (config.optimization_level <= 1)
 			break;
 	}
@@ -247,7 +249,7 @@ void debug(const Config &config)
 		con.Query(read_file(LOAD_PATH + "load_convert_rule.sql"));
 		con.Query(read_file(LOAD_PATH + "load_prune_rule.sql"));
 	}
-	if (config.optimization_level == 3)
+	if (config.optimization_level == 3 || config.optimization_level == 5)
 	{
 		con.Query(read_file(LOAD_PATH + "load_merge_rule.sql"));
 	}
@@ -257,7 +259,15 @@ void debug(const Config &config)
 	}
 
 	std::string sql_path = SQL_PATH + config.workload + "/";
-	std::vector<std::string> predicates = read_predicates(sql_path + "predicates.txt");
+	std::vector<std::string> predicates;
+	if (config.model_type == "rf")
+	{
+		predicates = read_predicates(sql_path + "predicates.txt");
+	}
+	else
+	{
+		predicates = read_predicates(sql_path + "predicates-dt.txt");
+	}
 
 	std::ofstream outputfile;
 	outputfile.open(sql_path + "output-debug.csv", std::ios::app);
