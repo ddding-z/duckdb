@@ -13,6 +13,8 @@ from skl2onnx import convert_sklearn
 from onnxconverter_common import FloatTensorType, Int64TensorType, StringTensorType
 import argparse
 
+import joblib
+
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -49,6 +51,12 @@ data["hour"] = data.datetime.apply(lambda x: x.split()[1].split(":")[0]).astype(
 numerical = ["hour", "atemp", "humidity", "windspeed"]
 categorical = ["season", "holiday", "workingday", "weather"]
 input_columns = numerical + categorical
+
+# to_csv
+# selected_columns = input_columns
+# selected_columns.append(label)
+# selected_data = data.loc[:, selected_columns]
+# selected_data.to_csv(f"{data_name}.csv", index=False)
 
 # define pipeline
 preprocessor = ColumnTransformer(
@@ -95,6 +103,8 @@ now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 model_name = f"{data_name}_t{tree_num}_d{sum(depth) // tree_num}_l{sum(leaves) // tree_num}_n{sum(node_count) //tree_num}_{now}"
 onnx_path = f"model/{model_name}.onnx"
 
+# joblib.dump(pipeline, f"{model_name}.joblib")
+
 # save model pred distribution
 pred = pipeline.predict(X)
 plot_value_distribution(pred, model_name)
@@ -119,8 +129,6 @@ model_onnx = convert_sklearn(pipeline, initial_types=init_types)
 # optimize model
 optimized_model = onnxoptimizer.optimize(model_onnx)
 onnx.save_model(optimized_model, onnx_path)
-
-
 
 with open(f"/volumn/Retree_exp/queries/Retree/workloads/workload_models.csv", "a", encoding="utf-8") as f:
     f.write(f"{data_name},{model_name}\n")
