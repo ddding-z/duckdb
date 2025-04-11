@@ -81,14 +81,14 @@ public:
 							return true;
 						}
 						// timer
-						// std::ofstream outputfile("/volumn/duckdb/examples/embedded-c++/workload/pruning_cost.txt",
+						// std::ofstream outputfile("/volumn/Retree_exp/prune.csv",
 						//                          std::ios::app);
 						// auto start = std::chrono::high_resolution_clock::now();
 						// auto opted_model_path = optimize_on_decision_tree_predicate_prune(
 						//     original_model_path, comparison_operator_, predicate, threads_count);
 						// auto end = std::chrono::high_resolution_clock::now();
 						// std::chrono::duration<double, std::milli> duration = end - start;
-						// outputfile << "DTPrune time cost (s): " << duration.count() / 1000 << "\n";
+						// outputfile << opted_model_path << "," << duration.count() << "\n";
 						// outputfile.close();
 
 						// original_model_path: after convert model path 

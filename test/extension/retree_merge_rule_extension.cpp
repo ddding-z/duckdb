@@ -54,7 +54,7 @@ public:
 					std::string original_model_path = first_param.value.ToString();
 					if (original_model_path.find("pruned") != std::string::npos) {
 
-						// std::ofstream outputfile("/volumn/duckdb/examples/embedded-c++/workload/merging_cost.txt",
+						// std::ofstream outputfile("/volumn/Retree_exp/merge.csv",
 						//                          std::ios::app);
 						// auto start = std::chrono::high_resolution_clock::now();
 
@@ -63,12 +63,18 @@ public:
 
 						// auto end = std::chrono::high_resolution_clock::now();
 						// std::chrono::duration<double, std::milli> duration = end - start;
-						// outputfile << "DTMerge time cost (s): "
-						//            << duration.count() / 1000 << "\n";
+						// outputfile << opted_model_path << "," << duration.count() << "\n";
 						// outputfile.close();
 
-						auto opted_model_path =
-						optimize_on_decision_tree_predicate_merge(original_model_path, threads_count);
+						auto opted_model_path = optimize_on_decision_tree_predicate_merge(original_model_path, threads_count);
+						// ** to measure optimization time
+						// std::smatch match;
+						// std::regex pattern(R"((.*?)(_pruned.*|_reg_pruned.*|_merged\.onnx))");
+						// if (std::regex_match(opted_model_path, match, pattern)) {
+						// 	duckdb::Value model_path_value(match[1].str()+".onnx");
+						// 	first_param.value = model_path_value;
+						// 	return true;							
+						// }
 						duckdb::Value model_path_value(opted_model_path);
 						first_param.value = model_path_value;
 						return true;
