@@ -4,7 +4,6 @@ import numpy as np
 import onnxoptimizer
 import pandas as pd
 import onnx
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
@@ -18,7 +17,7 @@ import os
 from sklearn.tree import DecisionTreeRegressor
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from utils import percentile_values, plot_feature_importances, plot_value_distribution, value_distribution
+from utils import percentile_values, plot_sklearn_tree, plot_tree_charts, plot_feature_importances, plot_value_distribution, value_distribution
 
 def wmae_test(test, pred): # WMAE for test 
     weights = X_test['IsHoliday'].apply(lambda is_holiday:5 if is_holiday else 1)
@@ -27,20 +26,6 @@ def wmae_test(test, pred): # WMAE for test
 
 """ 
 walmart-sales: walmart kaggle version
-多表回归任务
-              precision    recall  f1-score   support
-
-           1       0.00      0.00      0.00        12
-           2       0.66      0.65      0.66       661
-           3       0.55      0.63      0.59       968
-           4       0.95      0.02      0.05       747
-           5       0.41      0.83      0.54       943
-           6       0.90      0.54      0.68       836
-           7       1.00      0.06      0.12        49
-
-    accuracy                           0.55      4216
-   macro avg       0.64      0.39      0.38      4216
-weighted avg       0.68      0.55      0.50      4216
 
 python train_walmart_sales_dt.py -td 10
 """
@@ -202,7 +187,8 @@ onnx_path = f"model/{model_name}.onnx"
 
 # save model pred distribution
 pred = pipeline.predict(X)
-plot_value_distribution(pred, model_name)
+# plot_sklearn_tree(model, model_name, input_columns, y_test)
+# plot_value_distribution(pred, model_name)
 percentile_values(pred, data_name, model_name)
 
 # convert and save model
@@ -221,9 +207,9 @@ model_onnx = convert_sklearn(pipeline, initial_types=init_types)
 # optimize model
 optimized_model = onnxoptimizer.optimize(model_onnx)
 onnx.save_model(optimized_model, onnx_path)
+plot_tree_charts(optimized_model, model_name)
 
 
 
-
-with open(f"/volumn/Retree_exp/queries/Retree/workloads/workload_models.csv", "a", encoding="utf-8") as f:
-    f.write(f"{data_name},{model_name}\n")
+# with open(f"/volumn/Retree_exp/queries/Retree/workloads/workload_models.csv", "a", encoding="utf-8") as f:
+#     f.write(f"{data_name},{model_name}\n")

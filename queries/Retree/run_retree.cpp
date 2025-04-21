@@ -106,45 +106,6 @@ std::string replacePlaceholder(std::string str, const std::string &from, const s
 	return str;
 }
 
-/* void getFeatureFrequncey(const Config &config, const std::string &predicate)
-{
-	std::string model_full_path = MODEL_PATH + config.workload + "/model/" + config.model;
-	if (config.optimization_level == 0)
-	{
-		// model_full_path += ".onnx";
-	}
-	else if (config.optimization_level == 2)
-	{
-		auto threshold = std::stof(predicate);
-		if (config.model_type.find("clf") != std::string::npos)
-		{
-			model_full_path += "_reg_pruned" + std::to_string(threshold);
-		}
-		else
-		{
-			threshold /= 100;
-			model_full_path += "_pruned" + std::to_string(threshold);
-		}
-	}
-	else if (config.optimization_level == 3)
-	{
-		auto threshold = std::stof(predicate);
-		if (config.model_type.find("clf") != std::string::npos)
-		{
-			model_full_path += "_reg_pruned" + std::to_string(threshold) + "_merged";
-		}
-		else
-		{
-			threshold /= 100;
-			model_full_path += "_pruned" + std::to_string(threshold) + "_merged";
-		}
-	}
-	// std::cout << model_full_path << std::endl;
-
-	std::string cmd = "python feature_frequency.py -m " + model_full_path;
-	system(cmd.c_str());
-} */
-
 void run(const Config &config)
 {
 	std::string sql_path = SQL_PATH + config.workload + "/";
@@ -161,18 +122,33 @@ void run(const Config &config)
 	con.Query("set allow_extensions_metadata_mismatch=true;");
 	con.Query(read_file(LOAD_PATH + "load_inference_function.sql"));
 
-	if (config.optimization_level > 1)
+	switch (config.optimization_level)
 	{
+	case 1:
+		break;
+	case 2:
 		con.Query(read_file(LOAD_PATH + "load_convert_rule.sql"));
 		con.Query(read_file(LOAD_PATH + "load_prune_rule.sql"));
-	}
-	if (config.optimization_level == 3 || config.optimization_level == 5)
-	{
+		break;
+	case 3: // merge
+	case 5: // one boundary
+		con.Query(read_file(LOAD_PATH + "load_convert_rule.sql"));
+		con.Query(read_file(LOAD_PATH + "load_prune_rule.sql"));
 		con.Query(read_file(LOAD_PATH + "load_merge_rule.sql"));
-	}
-	else if (config.optimization_level == 4)
-	{
+		break;
+	case 4:
+		con.Query(read_file(LOAD_PATH + "load_convert_rule.sql"));
+		con.Query(read_file(LOAD_PATH + "load_prune_rule.sql"));
 		con.Query(read_file(LOAD_PATH + "load_naive_merge_rule.sql"));
+		break;
+	case 6:
+		con.Query(read_file(LOAD_PATH + "load_retree_rules_1.sql"));
+		break;
+	case 7:
+		con.Query(read_file(LOAD_PATH + "load_retree_rules_2.sql"));
+		break;
+	default:
+		break;
 	}
 
 	std::vector<std::string> predicates;
@@ -244,18 +220,33 @@ void debug(const Config &config)
 
 	con.Query(read_file(LOAD_PATH + "load_inference_function.sql"));
 
-	if (config.optimization_level > 1)
+	switch (config.optimization_level)
 	{
+	case 1:
+		break;
+	case 2:
 		con.Query(read_file(LOAD_PATH + "load_convert_rule.sql"));
 		con.Query(read_file(LOAD_PATH + "load_prune_rule.sql"));
-	}
-	if (config.optimization_level == 3 || config.optimization_level == 5)
-	{
+		break;
+	case 3: // merge
+	case 5: // one boundary
+		con.Query(read_file(LOAD_PATH + "load_convert_rule.sql"));
+		con.Query(read_file(LOAD_PATH + "load_prune_rule.sql"));
 		con.Query(read_file(LOAD_PATH + "load_merge_rule.sql"));
-	}
-	else if (config.optimization_level == 4)
-	{
+		break;
+	case 4:
+		con.Query(read_file(LOAD_PATH + "load_convert_rule.sql"));
+		con.Query(read_file(LOAD_PATH + "load_prune_rule.sql"));
 		con.Query(read_file(LOAD_PATH + "load_naive_merge_rule.sql"));
+		break;
+	case 6:
+		con.Query(read_file(LOAD_PATH + "load_retree_rules_1.sql"));
+		break;
+	case 7:
+		con.Query(read_file(LOAD_PATH + "load_retree_rules_2.sql"));
+		break;
+	default:
+		break;
 	}
 
 	std::string sql_path = SQL_PATH + config.workload + "/";

@@ -107,10 +107,10 @@ def plot_feature_importances(model, shape, filename):
     plt.close()
 
 def plot_sklearn_tree(model, model_name, input_columns, y_test):
-    # plt.figure(figsize=(20, 10))
-    plt.figure()
+    plt.figure(figsize=(30, 20))
+    # plt.figure()
     plot_tree(model, filled=True, feature_names=input_columns, class_names=list(map(str, list(set(y_test)))), rounded=True)
-    plt.savefig(f"model/{model_name}.png")
+    plt.savefig(f"model/{model_name}.pdf", dpi=1000)
     plt.close()
 
 def plot_tree_charts(model, model_name):
