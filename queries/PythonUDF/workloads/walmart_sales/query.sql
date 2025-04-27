@@ -60,7 +60,7 @@ WITH
             sales s
             INNER JOIN features f ON s.Store = f.Store
             AND s.Date = f.Date
-            AND s.IsHoliday = f.IsHoliday
+            -- AND s.IsHoliday = f.IsHoliday
             INNER JOIN stores st ON s.Store = st.Store
     )
 
