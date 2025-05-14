@@ -38,8 +38,8 @@ data = pd.merge(
     R3_dairports,
     how="inner",
 )
-# data.to_csv("flights_1G.csv", index=False)
-X_expanded.to_csv(outpath1 + path1, index=False)
+data.to_csv("flights_1G.csv", index=False)
+# X_expanded.to_csv(outpath1 + path1, index=False)
 
 # expand to 10G
 # X_expanded_1G = pd.read_csv(outpath1 + path1)

@@ -1,6 +1,5 @@
 #include "duckdb.hpp"
 
-#include <array>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -147,6 +146,9 @@ void run(const Config &config)
 	case 7:
 		con.Query(read_file(LOAD_PATH + "load_retree_rules_2.sql"));
 		break;
+	case 8: // clf2reg
+		con.Query(read_file(LOAD_PATH + "load_convert_rule.sql"));
+		break;
 	default:
 		break;
 	}
@@ -244,6 +246,9 @@ void debug(const Config &config)
 		break;
 	case 7:
 		con.Query(read_file(LOAD_PATH + "load_retree_rules_2.sql"));
+		break;
+	case 8: // clf2reg
+		con.Query(read_file(LOAD_PATH + "load_convert_rule.sql"));
 		break;
 	default:
 		break;
