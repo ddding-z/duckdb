@@ -11,7 +11,9 @@ archive/
 
 queries/Retree/workloads/archive
 
-queries/Smart/workloads/
+queries/Smart/workloads/*/output.csv
+
+queries/Retree/workloads/*/output.csv
 
 micro/selectivity/workloads/*/query_*.sql
 
@@ -29,7 +31,9 @@ test-scripts/
 *.db
 *.ipynb
 *.out
+*.pdf
 
 build/
-queries/Retree/workloads/*/output.csv
 *.sh
+
+micro/

@@ -1,1 +1,0 @@
-LOAD '/volumn/Retree_exp/duckdb/build_release/test/extension/retree_naive_merge_rule_extension.duckdb_extension'

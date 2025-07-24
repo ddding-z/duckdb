@@ -1,1 +1,0 @@
-LOAD '/volumn/Retree_exp/duckdb/build_release/test/extension/retree_prune_rule_extension.duckdb_extension';
