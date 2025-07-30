@@ -23,6 +23,8 @@ workloads/*/data-extension/1G/*
 workloads/*/data-extension/10G/*
 workloads/batch_append.py
 
+workloads/walmart_sales/query_demo.sql
+
 figure/
 test-scripts/
 
@@ -37,3 +39,20 @@ build/
 *.sh
 
 micro/
+
+
+!workloads/bike_sharing_demand/data/bike_sharing_demand.csv
+
+!workloads/flights/data/R1_airlines.csv
+!workloads/flights/data/R2_sairports.csv
+!workloads/flights/data/R3_dairports.csv
+!workloads/flights/data/S_routes.csv
+
+!workloads/medical_charges/data/medical_charges.csv
+
+!workloads/walmart_sales/data/features.csv
+!workloads/walmart_sales/data/stores.csv
+!workloads/walmart_sales/data/test.csv
+!workloads/walmart_sales/data/train.csv
+
+!workloads/wine_quality/data/wine_quality.csv
